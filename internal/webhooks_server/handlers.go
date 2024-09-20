@@ -1,11 +1,12 @@
-package handlers
+package webhooks_server
 
 import (
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
-	"strings"
+
+	"github.com/ZeroHubProjects/discord-bot/internal/util"
 )
 
 func WebhookRequestHandler(w http.ResponseWriter, r *http.Request) {
@@ -23,31 +24,25 @@ func WebhookRequestHandler(w http.ResponseWriter, r *http.Request) {
 
 func handleRequest(r *http.Request) response {
 	query := r.URL.Query()
-	fmt.Printf("conn: %+v\n", r)
-	debugString := "accepting a connection: "
-	debugStringElements := []string{}
-	for k := range query {
-		if k == "key" {
-			continue
-		}
-		debugStringElements = append(debugStringElements, fmt.Sprintf("%s: %+v", k, query.Get(k)))
-	}
-	debugString += strings.Join(debugStringElements, ", ")
-	fmt.Println(debugString)
+	util.DebugPrintWebhookRequest(query, logger)
 
 	requestType := query.Get("type")
-	accessKey := query.Get("key")
-	// TODO(rufus): implement proper access management
-	authorized := accessKey == "test-key"
+	providedKey := query.Get("key")
 
-	if !authorized && (accessKey != "") {
-		fmt.Printf("invalid key authorization attempted: got %v\n", accessKey)
+	var authorized bool
+	if providedKey == webhooksConfig.AccessKey {
+		authorized = true
+	} else {
+		if providedKey != "" {
+			// it's ok to log invalid keys
+			logger.Infof("invalid key authorization attempted: got %v", providedKey)
+		}
 	}
 
 	data, err := url.QueryUnescape(query.Get("data"))
 	if err != nil {
 		err := fmt.Errorf("failed to url decode data: %w", err)
-		fmt.Println(err)
+		logger.Info(err)
 		return GetBadRequestResponse(codeMalformedData, err.Error())
 	}
 
@@ -58,17 +53,20 @@ func handleRequest(r *http.Request) response {
 	case "":
 		return WelcomeResponse
 	default:
-		return GetBadRequestResponse(codeUnknownRequestType, fmt.Sprintf("Webhook requests of type `%s` are not supported", requestType))
+		return GetTeapotResponse(codeUnknownRequestType, fmt.Sprintf("Webhook requests of type `%s` are not supported", requestType))
 	}
 
 	if err != nil {
-		fmt.Println(err)
+		logger.Infof("failed to handle webhook: %v", err)
 	}
 	return resp
 
 }
 
 func handleOOC(data string, authorized bool) (response, error) {
+	if !webhooksConfig.OOC.Enabled {
+		return GetServiceUnavailableResponse(codeWebhookDisabled, "OOC webhook is currently disabled"), nil
+	}
 	if !authorized {
 		return ForbiddenResponse, nil
 	}
@@ -84,6 +82,7 @@ func handleOOC(data string, authorized bool) (response, error) {
 	if requestData.Ckey == "" || requestData.Message == "" {
 		return GetBadRequestResponse(codeMalformedData, "Both `ckey` and `message` are required in the `data`"), nil
 	}
+	// TODO(rufus): implement actual handling
 	fmt.Printf("%+v\n", requestData)
 	return SuccessResponse, nil
 }

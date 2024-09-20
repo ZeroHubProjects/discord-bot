@@ -1,4 +1,4 @@
-package handlers
+package webhooks_server
 
 import "net/http"
 
@@ -14,6 +14,7 @@ const (
 	codeEmptyData          = "empty_data"
 	codeMalformedData      = "malformed_data"
 	codeUnknownRequestType = "unknown_request_type"
+	codeWebhookDisabled    = "webhook_disabled"
 )
 
 var (
@@ -44,6 +45,22 @@ var (
 func GetBadRequestResponse(code, details string) response {
 	return response{
 		statusCode: http.StatusBadRequest,
+		Code:       code,
+		Details:    details,
+	}
+}
+
+func GetTeapotResponse(code, details string) response {
+	return response{
+		statusCode: http.StatusTeapot,
+		Code:       code,
+		Details:    details,
+	}
+}
+
+func GetServiceUnavailableResponse(code, details string) response {
+	return response{
+		statusCode: http.StatusServiceUnavailable,
 		Code:       code,
 		Details:    details,
 	}

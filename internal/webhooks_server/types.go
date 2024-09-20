@@ -1,4 +1,4 @@
-package handlers
+package webhooks_server
 
 type oocRequestData struct {
 	Ckey    string `json:"ckey"`
