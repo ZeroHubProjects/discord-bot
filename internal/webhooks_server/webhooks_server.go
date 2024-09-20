@@ -25,7 +25,7 @@ func Run(cfg config.Config, wg *sync.WaitGroup) {
 	// TODO(rufus): full request logging with credentials filtering
 	r.Get("/", WebhookRequestHandler)
 
-	logger.Debugf("Webhooks server listening on port %d", cfg.Modules.Webhooks.Port)
+	logger.Debugf("Webhooks server listening on port %d...", cfg.Modules.Webhooks.Port)
 	http.ListenAndServe(fmt.Sprintf(":%d", cfg.Modules.Webhooks.Port), recoverMiddleware(r))
 }
 
