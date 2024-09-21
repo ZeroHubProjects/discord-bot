@@ -20,6 +20,10 @@ func Run(cfg config.Config, wg *sync.WaitGroup) {
 	webhooksConfig = cfg.Modules.Webhooks
 	logger = cfg.Logger.Named("webhooks")
 
+	// message queue workers so messages have some buffer even during service interruptions
+	go runOOCProcessingLoop()
+
+	// router
 	r := chi.NewRouter()
 	// TODO(rufus): api documentation
 	// TODO(rufus): full request logging with credentials filtering

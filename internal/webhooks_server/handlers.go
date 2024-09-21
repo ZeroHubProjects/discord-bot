@@ -73,16 +73,15 @@ func handleOOC(data string, authorized bool) (response, error) {
 	if data == "" {
 		return GetBadRequestResponse(codeEmptyData, "A request `data` was expected, but is missing"), nil
 	}
-	var requestData oocRequestData
-	err := json.Unmarshal([]byte(data), &requestData)
+	var msg webhookOOCMessage
+	err := json.Unmarshal([]byte(data), &msg)
 	if err != nil {
 		err := fmt.Errorf("failed to unmarshal data: %w", err)
 		return GetBadRequestResponse(codeMalformedData, err.Error()), err
 	}
-	if requestData.Ckey == "" || requestData.Message == "" {
+	if msg.Ckey == "" || msg.Message == "" {
 		return GetBadRequestResponse(codeMalformedData, "Both `ckey` and `message` are required in the `data`"), nil
 	}
-	// TODO(rufus): implement actual handling
-	fmt.Printf("%+v\n", requestData)
+	enqueueOOCMessage(msg)
 	return SuccessResponse, nil
 }
