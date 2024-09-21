@@ -1,0 +1,5 @@
+{
+  "editor.bracketPairColorization.enabled": true,
+  "gitlens.blame.ignoreWhitespace": true,
+  "files.trimFinalNewlines": true
+}

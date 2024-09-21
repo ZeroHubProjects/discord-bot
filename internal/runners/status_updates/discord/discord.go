@@ -77,22 +77,18 @@ func findStatusMessage(channelID, token string, ctx context.Context) (*Message, 
 
 func postStatusMessage(payload, channelID, token string, ctx context.Context) error {
 	postMessageApiURL := fmt.Sprintf("https://discord.com/api/v10/channels/%s/messages", channelID)
-	err := requests.
+	return requests.
 		URL(postMessageApiURL).
 		Header("Content-Type", "application/json").
 		Header("Authorization", "Bot "+token).
 		BodyBytes([]byte(payload)).
 		AddValidator(util.PrintErrBodyValidationHandler()).
 		Fetch(ctx)
-	if err != nil {
-		return fmt.Errorf("request failed: %w", err)
-	}
-	return nil
 }
 
 func updateStatusMessage(message, messageID, channelID, token string, ctx context.Context) error {
 	patchMessageApiURL := fmt.Sprintf("https://discord.com/api/v10/channels/%s/messages/%s", channelID, messageID)
-	err := requests.
+	return requests.
 		URL(patchMessageApiURL).
 		Header("Content-Type", "application/json").
 		Header("Authorization", "Bot "+token).
@@ -100,10 +96,6 @@ func updateStatusMessage(message, messageID, channelID, token string, ctx contex
 		AddValidator(util.PrintErrBodyValidationHandler()).
 		Patch().
 		Fetch(ctx)
-	if err != nil {
-		return fmt.Errorf("failed to send request: %w", err)
-	}
-	return nil
 }
 
 func getMessagesByChannelID(channelID, token string, ctx context.Context) ([]Message, error) {
@@ -115,10 +107,7 @@ func getMessagesByChannelID(channelID, token string, ctx context.Context) ([]Mes
 		ToJSON(&messages).
 		AddValidator(util.PrintErrBodyValidationHandler()).
 		Fetch(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("failed to fetch status channel messages: %w", err)
-	}
-	return messages, nil
+	return messages, err
 }
 
 var currentUnixTimestamp = func() int64 { return time.Now().Unix() }

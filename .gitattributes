@@ -1,0 +1,10 @@
+# Following the practices from the main golang repository
+# See https://github.com/golang/go/blob/ee379d2b08ce12c24042da18d711e2a1bd7943f0/.gitattributes
+#
+# All files are treated as binary, with no git magic updating line endings, allowing for predictable results.
+# Usage of editorconfig (https://editorconfig.org/) is recommended for ensuring correct line endings on contributions.
+#
+# Windows git users are encouraged to set `core.autocrlf` configuration parameter to `input`.
+# See https://github.com/golang/go/issues/9281#issuecomment-66736184
+
+* -text
