@@ -30,7 +30,7 @@ func handleRequest(r *http.Request) response {
 	providedKey := query.Get("key")
 
 	var authorized bool
-	if providedKey == webhooksConfig.AccessKey {
+	if providedKey == globalConfig.Modules.Webhooks.AccessKey {
 		authorized = true
 	} else {
 		if providedKey != "" {
@@ -64,7 +64,7 @@ func handleRequest(r *http.Request) response {
 }
 
 func handleOOC(data string, authorized bool) (response, error) {
-	if !webhooksConfig.OOC.Enabled {
+	if !globalConfig.Modules.Webhooks.OOC.Enabled {
 		return GetServiceUnavailableResponse(codeWebhookDisabled, "OOC webhook is currently disabled"), nil
 	}
 	if !authorized {

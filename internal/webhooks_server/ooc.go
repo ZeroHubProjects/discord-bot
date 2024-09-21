@@ -41,7 +41,7 @@ func SendOOCToDiscord(msg webhookOOCMessage) error {
 	if err != nil {
 		return fmt.Errorf("failed to marshal message: %w", err)
 	}
-	return postDiscordMessage(payload, webhooksConfig.OOC.DiscordChannelID, webhooksConfig.AccessKey)
+	return postDiscordMessage(payload, globalConfig.Modules.Webhooks.OOC.DiscordChannelID, globalConfig.DiscordBotToken)
 }
 
 func postDiscordMessage(payload []byte, channelID, token string) error {

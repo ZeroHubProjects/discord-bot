@@ -11,13 +11,13 @@ import (
 	"go.uber.org/zap"
 )
 
-var webhooksConfig config.Webhooks
+var globalConfig config.Config
 var logger *zap.SugaredLogger
 
 func Run(cfg config.Config, wg *sync.WaitGroup) {
 	defer wg.Done()
 
-	webhooksConfig = cfg.Modules.Webhooks
+	globalConfig = cfg
 	logger = cfg.Logger.Named("webhooks")
 
 	// message queue workers so messages have some buffer even during service interruptions
