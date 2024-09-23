@@ -52,10 +52,7 @@ func (h *webhookHandler) checkAuthorization(key string) bool {
 }
 
 func (h *webhookHandler) handleResponse(r response, w http.ResponseWriter) {
-	h.logger.Debug("webhook response",
-		zap.Int("status_code", r.statusCode),
-		zap.String("code", r.Code),
-		zap.String("details", r.Details))
+	h.logger.Debugf("webhook response: %d %s %s", r.statusCode, r.Code, r.Details)
 	w.WriteHeader(r.statusCode)
 	err := json.NewEncoder(w).Encode(r)
 	if err != nil {
