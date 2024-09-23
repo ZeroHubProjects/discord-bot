@@ -14,9 +14,10 @@ func Run(ss13ServerAddress, statusChannelID string, dg *discordgo.Session, logge
 	defer wg.Done()
 
 	statusUpdater := statusUpdater{
-		Discord:           dg,
-		SS13ServerAddress: ss13ServerAddress,
-		StatusChannelID:   statusChannelID,
+		discord:           dg,
+		ss13ServerAddress: ss13ServerAddress,
+		statusChannelID:   statusChannelID,
+		logger:            logger,
 	}
 
 	for {

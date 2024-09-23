@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/bwmarrin/discordgo"
+	"go.uber.org/zap"
 )
 
 const (
@@ -17,18 +18,21 @@ const (
 )
 
 type statusUpdater struct {
-	Discord           *discordgo.Session
-	SS13ServerAddress string
-	StatusChannelID   string
+	discord           *discordgo.Session
+	ss13ServerAddress string
+	statusChannelID   string
+	logger            *zap.SugaredLogger
 }
 
 func (s *statusUpdater) updateServerStatus() error {
-	serverStatus, err := getServerStatus(s.SS13ServerAddress)
+	serverStatus, err := getServerStatus(s.ss13ServerAddress)
 	if err != nil {
-		return fmt.Errorf("failed to get server status: %w", err)
+		s.logger.Warnf("failed to get server status: %v", err)
+		serverStatus.RoundTime = "Unknown... (Server restarting or stopped)"
+		serverStatus.Map = "Unknown..."
 	}
 
-	msgs, err := s.Discord.ChannelMessages(s.StatusChannelID, 10, "", "", "")
+	msgs, err := s.discord.ChannelMessages(s.statusChannelID, 10, "", "", "")
 	if err != nil {
 		return fmt.Errorf("failed to get messages from the status updates channel: %w", err)
 	}
@@ -54,13 +58,13 @@ func (s *statusUpdater) updateServerStatus() error {
 
 	if statusMessage == nil {
 		newMessage := discordgo.MessageSend{Embeds: []*discordgo.MessageEmbed{embed}}
-		_, err := s.Discord.ChannelMessageSendComplex(s.StatusChannelID, &newMessage)
+		_, err := s.discord.ChannelMessageSendComplex(s.statusChannelID, &newMessage)
 		if err != nil {
 			return fmt.Errorf("failed to post status message: %w", err)
 		}
 	} else {
-		newEdit := discordgo.NewMessageEdit(s.StatusChannelID, statusMessage.ID).SetEmbed(embed)
-		_, err := s.Discord.ChannelMessageEditComplex(newEdit)
+		newEdit := discordgo.NewMessageEdit(s.statusChannelID, statusMessage.ID).SetEmbed(embed)
+		_, err := s.discord.ChannelMessageEditComplex(newEdit)
 		if err != nil {
 			return fmt.Errorf("failed to update status message: %w", err)
 		}
@@ -77,7 +81,7 @@ func (s *statusUpdater) getStatusMessageDescription(serverStatus serverStatus) (
 		RoundTime:     serverStatus.RoundTime,
 		Map:           serverStatus.Map,
 		Evac:          serverStatus.Evac == 1,
-		ServerAddress: "byond://" + s.SS13ServerAddress,
+		ServerAddress: "byond://" + s.ss13ServerAddress,
 		GitHubLink:    githubLink,
 	}
 	descriptionTmpl := template.Must(template.
