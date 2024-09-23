@@ -32,10 +32,6 @@ func main() {
 		loggerLevel.SetLevel(zap.InfoLevel)
 	}
 
-	if !cfg.DebugLog {
-		loggerLevel.SetLevel(zap.InfoLevel)
-	}
-
 	dg, err := discordgo.New("Bot " + cfg.Discord.BotToken)
 	if err != nil {
 		logger.Fatalf("can't set up discord session: %v", err)

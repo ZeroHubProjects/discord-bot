@@ -1,4 +1,4 @@
-package ss13
+package statusupdates
 
 import (
 	"context"
@@ -9,15 +9,15 @@ import (
 	"net"
 )
 
-type ServerStatus struct {
+type serverStatus struct {
 	Players   []string `json:"playerlist"`
 	RoundTime string   `json:"roundtime"`
 	Map       string   `json:"map"`
 	Evac      int      `json:"evac"`
 }
 
-func GetServerStatus(serverAddress string, ctx context.Context) (ServerStatus, error) {
-	var result ServerStatus
+func getServerStatus(serverAddress string, ctx context.Context) (serverStatus, error) {
+	var result serverStatus
 	resp, err := sendRequest(serverAddress, []byte("discordstatus"), ctx)
 	if err != nil {
 		return result, fmt.Errorf("failed to send request: %w", err)

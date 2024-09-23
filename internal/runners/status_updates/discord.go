@@ -1,4 +1,4 @@
-package discord
+package statusupdates
 
 import (
 	"bytes"
@@ -8,7 +8,6 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/ZeroHubProjects/discord-bot/internal/runners/status_updates/ss13"
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -18,15 +17,14 @@ const (
 	serverColor = 16725342 // discord accepts color in decimal, this is #FF355E aka Radical Red
 )
 
-type StatusUpdater struct {
+type statusUpdater struct {
 	Discord           *discordgo.Session
 	SS13ServerAddress string
 	StatusChannelID   string
 }
 
-// TODO(rufus): refactoring to discordgo
-func (s *StatusUpdater) UpdateServerStatus(ctx context.Context) error {
-	serverStatus, err := ss13.GetServerStatus(s.SS13ServerAddress, ctx)
+func (s *statusUpdater) updateServerStatus(ctx context.Context) error {
+	serverStatus, err := getServerStatus(s.SS13ServerAddress, ctx)
 	if err != nil {
 		return fmt.Errorf("failed to get server status: %w", err)
 	}
@@ -74,7 +72,7 @@ func (s *StatusUpdater) UpdateServerStatus(ctx context.Context) error {
 var currentUnixTimestamp = func() int64 { return time.Now().Unix() }
 var statusMessageTmplFuncs = template.FuncMap{"currentUnixTimestamp": currentUnixTimestamp, "join": strings.Join}
 
-func (s *StatusUpdater) getStatusMessageDescription(serverStatus ss13.ServerStatus) (string, error) {
+func (s *statusUpdater) getStatusMessageDescription(serverStatus serverStatus) (string, error) {
 	descPayloadParams := descriptionPayloadParams{
 		Players:       serverStatus.Players,
 		RoundTime:     serverStatus.RoundTime,

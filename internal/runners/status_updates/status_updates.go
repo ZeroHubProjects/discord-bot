@@ -5,7 +5,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ZeroHubProjects/discord-bot/internal/runners/status_updates/discord"
 	"github.com/bwmarrin/discordgo"
 	"go.uber.org/zap"
 )
@@ -15,11 +14,13 @@ var interval = time.Minute
 func Run(ss13ServerAddress, statusChannelID string, dg *discordgo.Session, logger *zap.SugaredLogger, wg *sync.WaitGroup) {
 	defer wg.Done()
 
-	statusUpdater := discord.StatusUpdater{
+	statusUpdater := statusUpdater{
 		Discord:           dg,
 		SS13ServerAddress: ss13ServerAddress,
 		StatusChannelID:   statusChannelID,
 	}
+
+	logger = logger.Named("status_updates")
 
 	for {
 		logger.Debugf("Running status updater with %v interval...", interval)
@@ -28,7 +29,7 @@ func Run(ss13ServerAddress, statusChannelID string, dg *discordgo.Session, logge
 	}
 }
 
-func runStatusUpdatesLoop(statusUpdater *discord.StatusUpdater, logger *zap.SugaredLogger) {
+func runStatusUpdatesLoop(statusUpdater *statusUpdater, logger *zap.SugaredLogger) {
 	defer func() {
 		if err := recover(); err != nil {
 			logger.Errorf("status updater panicked: %v", err)
@@ -37,7 +38,7 @@ func runStatusUpdatesLoop(statusUpdater *discord.StatusUpdater, logger *zap.Suga
 
 	for {
 		ctx, cancelCtx := context.WithTimeout(context.Background(), time.Second*5)
-		err := statusUpdater.UpdateServerStatus(ctx)
+		err := statusUpdater.updateServerStatus(ctx)
 		if err != nil {
 			logger.Errorf("failed to update server status: %v", err)
 		}
