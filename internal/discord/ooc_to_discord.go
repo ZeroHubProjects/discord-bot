@@ -2,6 +2,7 @@ package discord
 
 import (
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/ZeroHubProjects/discord-bot/internal/types"
@@ -25,7 +26,8 @@ func EnqueueOOCMessage(msg types.OOCMessage) error {
 	}
 }
 
-func runOOCProcessingLoop(channelID string, discord *discordgo.Session, logger *zap.SugaredLogger) {
+func RunOOCProcessingLoop(channelID string, discord *discordgo.Session, logger *zap.SugaredLogger, wg *sync.WaitGroup) {
+	defer wg.Done()
 	for {
 		msg := <-oocMessageQueue
 		formattedMessage := fmt.Sprintf("<t:%d:t> **%s**: %s", time.Now().Unix(), msg.SenderKey, msg.Message)

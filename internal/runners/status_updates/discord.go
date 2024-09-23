@@ -2,7 +2,6 @@ package statusupdates
 
 import (
 	"bytes"
-	"context"
 	"fmt"
 	"strings"
 	"text/template"
@@ -23,8 +22,8 @@ type statusUpdater struct {
 	StatusChannelID   string
 }
 
-func (s *statusUpdater) updateServerStatus(ctx context.Context) error {
-	serverStatus, err := getServerStatus(s.SS13ServerAddress, ctx)
+func (s *statusUpdater) updateServerStatus() error {
+	serverStatus, err := getServerStatus(s.SS13ServerAddress)
 	if err != nil {
 		return fmt.Errorf("failed to get server status: %w", err)
 	}

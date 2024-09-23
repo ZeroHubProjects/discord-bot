@@ -14,8 +14,6 @@ import (
 func Run(accessKey string, cfg config.WebhooksConfig, logger *zap.SugaredLogger, wg *sync.WaitGroup) {
 	defer wg.Done()
 
-	logger = logger.Named("webhooks")
-
 	handler := webhookHandler{
 		accessKey:  accessKey,
 		oocEnabled: cfg.OOCMessagesEnabled,

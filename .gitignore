@@ -19,5 +19,6 @@ logs/
 go.work
 go.work.sum
 
-# Main config file
-config.yaml
+# Ignore all configs except the example
+config*.yaml
+!config.example.yaml

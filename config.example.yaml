@@ -4,6 +4,8 @@ debug_log: true
 modules:
   # Main switch for the status updater module that will query your server and post that information on discord
   status_updates_enabled: true
+  # Switch for the DOOC (Discord OOC) module, which listens to messages in the ooc channel and relays them into the game
+  dooc_enabled: true
   webhooks:
     # Global switch for webhook handling, all webhooks endpoints will only work if this is enabled
     enabled: true

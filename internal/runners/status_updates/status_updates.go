@@ -1,7 +1,6 @@
 package statusupdates
 
 import (
-	"context"
 	"sync"
 	"time"
 
@@ -20,10 +19,8 @@ func Run(ss13ServerAddress, statusChannelID string, dg *discordgo.Session, logge
 		StatusChannelID:   statusChannelID,
 	}
 
-	logger = logger.Named("status_updates")
-
 	for {
-		logger.Debugf("Running status updater with %v interval...", interval)
+		logger.Debugf("updating with %v interval...", interval)
 		runStatusUpdatesLoop(&statusUpdater, logger)
 		time.Sleep(interval)
 	}
@@ -37,12 +34,10 @@ func runStatusUpdatesLoop(statusUpdater *statusUpdater, logger *zap.SugaredLogge
 	}()
 
 	for {
-		ctx, cancelCtx := context.WithTimeout(context.Background(), time.Second*5)
-		err := statusUpdater.updateServerStatus(ctx)
+		err := statusUpdater.updateServerStatus()
 		if err != nil {
 			logger.Errorf("failed to update server status: %v", err)
 		}
-		cancelCtx()
 		time.Sleep(interval)
 	}
 }

@@ -42,16 +42,25 @@ func main() {
 	// status updater module
 	if cfg.Modules.StatusUpdatesEnabled {
 		wg.Add(1)
-		go statusupdates.Run(cfg.SS13.ServerAddress, cfg.Discord.StatusChannelID, dg, logger, wg)
+		go statusupdates.Run(cfg.SS13.ServerAddress, cfg.Discord.StatusChannelID, dg, logger.Named("status_updates"), wg)
 	}
 	// webhooks server module
 	if cfg.Modules.Webhooks.Enabled {
 		wg.Add(1)
-		go server.Run(cfg.SS13.AccessKey, cfg.Modules.Webhooks, logger, wg)
+		go server.Run(cfg.SS13.AccessKey, cfg.Modules.Webhooks, logger.Named("webhooks"), wg)
+		if cfg.Modules.Webhooks.OOCMessagesEnabled {
+			wg.Add(1)
+			go discord.RunOOCProcessingLoop(cfg.Discord.OOCChannelID, dg, logger.Named("webhooks.ooc.processing"), wg)
+		}
 	}
 	// discord processing
-	// NOTE(rufus): this currently doesn't accept WaitGroup because it doesn't do anything on its own
-	go discord.Run(cfg.Discord, dg, logger)
+	if cfg.Modules.DOOCEnabled {
+		wg.Add(1)
+		go discord.RunDOOC(cfg.SS13, cfg.Discord, dg, logger.Named("discord.dooc"), wg)
+	}
+
+	dg.Open()
+	defer dg.Close()
 
 	wg.Wait()
 	logger.Info("all modules done working, exiting")
