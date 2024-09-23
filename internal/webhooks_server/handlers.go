@@ -6,82 +6,86 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/ZeroHubProjects/discord-bot/internal/util"
+	"github.com/ZeroHubProjects/discord-bot/internal/discord"
+	"github.com/ZeroHubProjects/discord-bot/internal/types"
+	"go.uber.org/zap"
 )
 
-func WebhookRequestHandler(w http.ResponseWriter, r *http.Request) {
-	response := handleRequest(r)
-
-	if response.statusCode == http.StatusNoContent {
-		w.WriteHeader(http.StatusNoContent)
-		return
-	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.statusCode)
-	json.NewEncoder(w).Encode(response)
-
+type webhookHandler struct {
+	accessKey  string
+	oocEnabled bool
+	logger     *zap.SugaredLogger
 }
 
-func handleRequest(r *http.Request) response {
+func (h *webhookHandler) handleRequest(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
-	util.DebugPrintWebhookRequest(query, logger)
+	h.logger.Debugf("received webhook: %s", webhookRequestToString(query))
 
-	requestType := query.Get("type")
-	providedKey := query.Get("key")
-
-	var authorized bool
-	if providedKey == globalConfig.Modules.Webhooks.AccessKey {
-		authorized = true
-	} else {
-		if providedKey != "" {
-			// it's ok to log invalid keys
-			logger.Infof("invalid key authorization attempted: got %v", providedKey)
-		}
-	}
+	authorized := h.checkAuthorization(query.Get("key"))
 
 	data, err := url.QueryUnescape(query.Get("data"))
 	if err != nil {
 		err := fmt.Errorf("failed to url decode data: %w", err)
-		logger.Info(err)
-		return GetBadRequestResponse(codeMalformedData, err.Error())
+		h.handleResponse(getResponse(http.StatusBadRequest, codeMalformedData, err.Error()), w)
 	}
 
 	var resp response
-	switch requestType {
+	switch query.Get("type") {
 	case "ooc":
-		resp, err = handleOOC(data, authorized)
+		resp = h.handleOOC(data, authorized)
 	case "":
-		return WelcomeResponse
+		resp = WelcomeResponse
 	default:
-		return GetTeapotResponse(codeUnknownRequestType, fmt.Sprintf("Webhook requests of type `%s` are not supported", requestType))
+		resp = getResponse(http.StatusTeapot, codeUnknownRequestType)
 	}
 
-	if err != nil {
-		logger.Infof("failed to handle webhook: %v", err)
-	}
-	return resp
-
+	h.handleResponse(resp, w)
 }
 
-func handleOOC(data string, authorized bool) (response, error) {
-	if !globalConfig.Modules.Webhooks.OOC.Enabled {
-		return GetServiceUnavailableResponse(codeWebhookDisabled, "OOC webhook is currently disabled"), nil
+func (h *webhookHandler) checkAuthorization(key string) bool {
+	if key != h.accessKey {
+		// it's ok to log invalid keys
+		h.logger.Infof("invalid key authorization attempted: got %v", key)
+		return false
+	}
+	return true
+}
+
+func (h *webhookHandler) handleResponse(r response, w http.ResponseWriter) {
+	h.logger.Debug("webhook response",
+		zap.Int("status_code", r.statusCode),
+		zap.String("code", r.Code),
+		zap.String("details", r.Details))
+	w.WriteHeader(r.statusCode)
+	err := json.NewEncoder(w).Encode(r)
+	if err != nil {
+		h.logger.Error("failed to encode webhook response")
+	}
+}
+
+func (h *webhookHandler) handleOOC(data string, authorized bool) response {
+	if !h.oocEnabled {
+		return getResponse(http.StatusServiceUnavailable, codeWebhookDisabled, "OOC webhook is currently disabled")
 	}
 	if !authorized {
-		return ForbiddenResponse, nil
+		return ForbiddenResponse
 	}
 	if data == "" {
-		return GetBadRequestResponse(codeEmptyData, "A request `data` was expected, but is missing"), nil
+		return getResponse(http.StatusBadRequest, codeEmptyData, "A request `data` was expected, but is missing")
 	}
-	var msg webhookOOCMessage
+	var msg types.OOCMessage
 	err := json.Unmarshal([]byte(data), &msg)
 	if err != nil {
 		err := fmt.Errorf("failed to unmarshal data: %w", err)
-		return GetBadRequestResponse(codeMalformedData, err.Error()), err
+		return getResponse(http.StatusBadRequest, codeMalformedData, err.Error())
 	}
 	if msg.Ckey == "" || msg.Message == "" {
-		return GetBadRequestResponse(codeMalformedData, "Both `ckey` and `message` are required in the `data`"), nil
+		return getResponse(http.StatusBadRequest, codeMalformedData, "Both `ckey` and `message` are required in the `data`")
 	}
-	enqueueOOCMessage(msg)
-	return SuccessResponse, nil
+	err = discord.EnqueueOOCMessage(msg)
+	if err != nil {
+		h.logger.Errorf("failed to enqueue ooc message: %v", err)
+		return getResponse(http.StatusServiceUnavailable, codeInternalServerError, err.Error())
+	}
+	return SuccessResponse
 }

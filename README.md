@@ -9,7 +9,7 @@ A bridge bot for SS13&lt;->Discord communication via webhooks and world.Topic()
 - Server Status Updates  
 - OOC chat to Discord channel bridge
 
-Each feature is represented by a module that can be disabled via config, allowing you to run just what you need.
+Each feature can be disabled via config, allowing you to run just what you need.
 
 ## Usage example
 Make sure you gave `Go` installed, see https://go.dev/  

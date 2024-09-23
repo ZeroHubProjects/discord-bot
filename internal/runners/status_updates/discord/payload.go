@@ -41,18 +41,6 @@ const (
 {{template "LastUpdated" . -}}
 {{end -}}
 `
-	statusMessagePayloadTemplate = `
-{{- block "Payload" . -}}
-{
-    "embeds": [{
-	    "type": "rich",
-	    "title": "{{.Title}}",
-	    "description": "{{.Description}}",
-	    "color": {{.Color}}
-    }]
-}
-{{- end -}}
-`
 )
 
 type descriptionPayloadParams struct {
@@ -62,10 +50,4 @@ type descriptionPayloadParams struct {
 	Map           string
 	Evac          bool
 	GitHubLink    string
-}
-
-type statusMessagePayloadParams struct {
-	Title       string
-	Description string
-	Color       string
 }

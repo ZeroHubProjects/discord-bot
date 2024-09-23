@@ -1,6 +1,9 @@
 package webhooks_server
 
-import "net/http"
+import (
+	"net/http"
+	"strings"
+)
 
 type response struct {
 	statusCode int    `json:"-"`
@@ -9,59 +12,43 @@ type response struct {
 }
 
 const (
-	codeWelcome            = "welcome"
-	codeSuccess            = "success"
-	codeEmptyData          = "empty_data"
-	codeMalformedData      = "malformed_data"
-	codeUnknownRequestType = "unknown_request_type"
-	codeWebhookDisabled    = "webhook_disabled"
+	codeWelcome             = "welcome"
+	codeSuccess             = "success"
+	codeBadAccessKey        = "bad_access_key"
+	codeEmptyData           = "empty_data"
+	codeMalformedData       = "malformed_data"
+	codeUnknownRequestType  = "unknown_request_type"
+	codeWebhookDisabled     = "webhook_disabled"
+	codeQueueFull           = "queue_full"
+	codeInternalServerError = "internal_server_error"
 )
 
 var (
 	WelcomeResponse = response{
 		statusCode: http.StatusOK,
-		Code:       "welcome",
+		Code:       codeWelcome,
 		Details:    "Welcome to discord-bot for ZeroOnyx, for usage instructions see https://github.com/ZeroHubProjects/discord-bot/blob/master/README.md",
 	}
 	SuccessResponse = response{
 		statusCode: http.StatusOK,
-		Code:       "success",
-	}
-	NoContentResponse = response{
-		statusCode: http.StatusNoContent,
+		Code:       codeSuccess,
 	}
 	ForbiddenResponse = response{
 		statusCode: http.StatusForbidden,
-		Code:       "bad_access_key",
+		Code:       codeBadAccessKey,
 		Details:    "An access `key` is required, but is invalid or missing",
 	}
 	InternalErrorResponse = response{
 		statusCode: http.StatusInternalServerError,
-		Code:       "internal_server_error",
+		Code:       codeInternalServerError,
 		Details:    "An internal server error has occured. Please contact the maintainers or submit an issue at https://github.com/ZeroHubProjects/discord-bot/issues",
 	}
 )
 
-func GetBadRequestResponse(code, details string) response {
+func getResponse(statusCode int, code string, details ...string) response {
 	return response{
-		statusCode: http.StatusBadRequest,
+		statusCode: statusCode,
 		Code:       code,
-		Details:    details,
-	}
-}
-
-func GetTeapotResponse(code, details string) response {
-	return response{
-		statusCode: http.StatusTeapot,
-		Code:       code,
-		Details:    details,
-	}
-}
-
-func GetServiceUnavailableResponse(code, details string) response {
-	return response{
-		statusCode: http.StatusServiceUnavailable,
-		Code:       code,
-		Details:    details,
+		Details:    strings.Join(details, "; "),
 	}
 }

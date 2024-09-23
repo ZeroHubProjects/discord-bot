@@ -1,7 +1,3 @@
-# Bot token of your discord application
-# Create your bot and find its token here https://discord.com/developers/applications
-discord_bot_token: "<your token here>"
-
 # The main address of the ss13 server that this bot will communicate with
 ss13_server_address: "zeroonyx.rufuszero.com:14076"
 
@@ -9,16 +5,22 @@ ss13_server_address: "zeroonyx.rufuszero.com:14076"
 debug_log: true
 
 modules:
-  status_updates:
-    enabled: true
-    # ID of the Discord channel where status updates will be posted
-    discord_channel_id: "1283679676895858750"
+  status_updates_enabled: true
   webhooks:
+    # Global switch for webhook handling, subfeatures of webhooks will only work if this is enabled
     enabled: true
+    # Network port on which webhooks server will be listening for the requests
     port: 14081
     # The access key that your ss13 server uses to authenticate incoming and outgoing requests, can be any string
     access_key: "<your key here>"
-    ooc_bridge:
-      enabled: true
-      # ID of the Discord channel where OOC messages will be posted
-      discord_channel_id: "1283485860968534066"
+    # Individual webhook endpoints
+    ooc_messages_enabled: true
+
+discord:
+  # Bot token of your discord application
+  # Create your bot and find its token here https://discord.com/developers/applications
+  bot_token: "<your token here>"
+  # Discord channel where status updates will be posted
+  status_channel_id: "1283679676895858750"
+  # Discord channel where OOC messages will be posted and DOOC messages will be accepted
+  ooc_channel_id: "1283485860968534066"
