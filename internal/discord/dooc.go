@@ -61,7 +61,7 @@ func (h *messageHandler) handle(s *discordgo.Session, m *discordgo.MessageCreate
 	}
 
 	// post a new formatted message with the same content
-	formattedMessage := fmt.Sprintf("<t:%d:t> `**[DOOC]**` **%s**: %s", time.Now().Unix(), m.Author.Username, m.Content)
+	formattedMessage := fmt.Sprintf("<t:%d:t> DOOC **%s**: %s", time.Now().Unix(), m.Author.Username, m.Content)
 	doocMessage, err := h.discord.ChannelMessageSend(m.ChannelID, formattedMessage)
 	if err != nil {
 		h.logger.Errorf("failed to send dooc message to discord: %v", err)
