@@ -1,20 +1,23 @@
-# The main address of the ss13 server that this bot will communicate with
-ss13_server_address: "zeroonyx.rufuszero.com:14076"
-
 # Enables extra verbose logging with debug information
 debug_log: true
 
 modules:
+  # Main switch for the status updater module that will query your server and post that information on discord
   status_updates_enabled: true
   webhooks:
-    # Global switch for webhook handling, subfeatures of webhooks will only work if this is enabled
+    # Global switch for webhook handling, all webhooks endpoints will only work if this is enabled
     enabled: true
     # Network port on which webhooks server will be listening for the requests
     port: 14081
-    # The access key that your ss13 server uses to authenticate incoming and outgoing requests, can be any string
-    access_key: "<your key here>"
     # Individual webhook endpoints
     ooc_messages_enabled: true
+
+ss13:
+  # The main address of the ss13 server that this bot will communicate with
+  server_address: "zeroonyx.rufuszero.com:14076"
+  # The access key that incoming requests will be checked against
+  # must match the key that is set on your ss13 server in webhook config, can be any string
+  access_key: "<your key here>"
 
 discord:
   # Bot token of your discord application

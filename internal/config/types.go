@@ -1,10 +1,10 @@
 package config
 
 type Config struct {
-	SS13ServerAddress string        `mapstructure:"ss13_server_address"`
-	DebugLog          bool          `mapstructure:"debug_log"`
-	Modules           ModulesConfig `mapstructure:"modules"`
-	Discord           DiscordConfig `mapstructure:"discord"`
+	DebugLog bool          `mapstructure:"debug_log"`
+	Modules  ModulesConfig `mapstructure:"modules"`
+	SS13     SS13Config    `mapstructure:"ss13"`
+	Discord  DiscordConfig `mapstructure:"discord"`
 }
 
 type ModulesConfig struct {
@@ -13,10 +13,14 @@ type ModulesConfig struct {
 }
 
 type WebhooksConfig struct {
-	Enabled            bool   `mapstructure:"enabled"`
-	Port               int    `mapstructure:"port"`
-	AccessKey          string `mapstructure:"access_key"`
-	OOCMessagesEnabled bool   `mapstructure:"ooc_messages_enabled"`
+	Enabled            bool `mapstructure:"enabled"`
+	Port               int  `mapstructure:"port"`
+	OOCMessagesEnabled bool `mapstructure:"ooc_messages_enabled"`
+}
+
+type SS13Config struct {
+	ServerAddress string `mapstructure:"server_address"`
+	AccessKey     string `mapstructure:"access_key"`
 }
 
 type DiscordConfig struct {

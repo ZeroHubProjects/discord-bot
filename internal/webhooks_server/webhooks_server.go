@@ -11,13 +11,13 @@ import (
 	"go.uber.org/zap"
 )
 
-func Run(cfg config.WebhooksConfig, logger *zap.SugaredLogger, wg *sync.WaitGroup) {
+func Run(accessKey string, cfg config.WebhooksConfig, logger *zap.SugaredLogger, wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	logger = logger.Named("webhooks")
 
 	handler := webhookHandler{
-		accessKey:  cfg.AccessKey,
+		accessKey:  accessKey,
 		oocEnabled: cfg.OOCMessagesEnabled,
 		logger:     logger,
 	}

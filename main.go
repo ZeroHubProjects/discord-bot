@@ -32,6 +32,7 @@ func main() {
 		loggerLevel.SetLevel(zap.InfoLevel)
 	}
 
+	// create a discord session
 	dg, err := discordgo.New("Bot " + cfg.Discord.BotToken)
 	if err != nil {
 		logger.Fatalf("can't set up discord session: %v", err)
@@ -41,12 +42,12 @@ func main() {
 	// status updater module
 	if cfg.Modules.StatusUpdatesEnabled {
 		wg.Add(1)
-		go statusupdates.Run(cfg.SS13ServerAddress, cfg.Discord.StatusChannelID, dg, logger, wg)
+		go statusupdates.Run(cfg.SS13.ServerAddress, cfg.Discord.StatusChannelID, dg, logger, wg)
 	}
 	// webhooks server module
 	if cfg.Modules.Webhooks.Enabled {
 		wg.Add(1)
-		go server.Run(cfg.Modules.Webhooks, logger, wg)
+		go server.Run(cfg.SS13.AccessKey, cfg.Modules.Webhooks, logger, wg)
 	}
 	// discord processing
 	// NOTE(rufus): this currently doesn't accept WaitGroup because it doesn't do anything on its own
