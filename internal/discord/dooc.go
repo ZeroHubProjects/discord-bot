@@ -6,6 +6,7 @@ import (
 	"os/signal"
 	"sync"
 	"syscall"
+	"time"
 
 	"github.com/ZeroHubProjects/discord-bot/internal/config"
 	"github.com/ZeroHubProjects/discord-bot/internal/ss13"
@@ -42,11 +43,20 @@ func (h *messageHandler) handle(s *discordgo.Session, m *discordgo.MessageCreate
 
 	// TODO(rufus): permission check
 
+	// relay messsage into the game
 	h.sendDOOCMessage(m.Author.Username, m.Content, h.ss13Config.ServerAddress, h.ss13Config.AccessKey)
 
+	// delete old message from the user
 	err := s.ChannelMessageDelete(m.ChannelID, m.ID)
 	if err != nil {
 		h.logger.Errorf("failed to delete a DOOC message from the channel: %v", err)
+	}
+
+	// post a new formatted message with the same content
+	formattedMessage := fmt.Sprintf("<t:%d:t> `**[DOOC]**` **%s**: %s", time.Now().Unix(), m.Author.Username, m.Content)
+	_, err = s.ChannelMessageSend(m.ChannelID, formattedMessage)
+	if err != nil {
+		h.logger.Errorf("failed to send dooc message to discord: %v", err)
 	}
 
 }
