@@ -79,7 +79,7 @@ func (h *webhookHandler) handleOOC(data string, authorized bool) response {
 		err := fmt.Errorf("failed to unmarshal data: %w", err)
 		return getResponse(http.StatusBadRequest, codeMalformedData, err.Error())
 	}
-	if msg.Ckey == "" || msg.Message == "" {
+	if msg.SenderKey == "" || msg.Message == "" {
 		return getResponse(http.StatusBadRequest, codeMalformedData, "Both `ckey` and `message` are required in the `data`")
 	}
 	err = discord.EnqueueOOCMessage(msg)

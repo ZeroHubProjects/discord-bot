@@ -28,7 +28,7 @@ func EnqueueOOCMessage(msg types.OOCMessage) error {
 func runOOCProcessingLoop(channelID string, discord *discordgo.Session, logger *zap.SugaredLogger) {
 	for {
 		msg := <-oocMessageQueue
-		formattedMessage := fmt.Sprintf("<t:%d:t> **%s**: %s", time.Now().Unix(), msg.Ckey, msg.Message)
+		formattedMessage := fmt.Sprintf("<t:%d:t> **%s**: %s", time.Now().Unix(), msg.SenderKey, msg.Message)
 		_, err := discord.ChannelMessageSend(channelID, formattedMessage)
 		if err != nil {
 			logger.Errorf("failed to send ooc message to discord: %v", err)

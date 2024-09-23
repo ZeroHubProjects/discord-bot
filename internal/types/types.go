@@ -1,6 +1,6 @@
 package types
 
 type OOCMessage struct {
-	Ckey    string `json:"ckey"`
-	Message string `json:"message"`
+	SenderKey string `json:"sender_key"`
+	Message   string `json:"message"`
 }
