@@ -2,10 +2,8 @@ package discord
 
 import (
 	"fmt"
-	"os"
-	"os/signal"
+	"strings"
 	"sync"
-	"syscall"
 	"time"
 
 	"github.com/ZeroHubProjects/discord-bot/internal/config"
@@ -14,21 +12,34 @@ import (
 	"go.uber.org/zap"
 )
 
+const retryMarker = ":hourglass:"
+
 type messageHandler struct {
 	ss13Config   config.SS13Config
 	oocChannelID string
+	discord      *discordgo.Session
 	logger       *zap.SugaredLogger
 }
 
 func RunDOOC(ss13Cfg config.SS13Config, cfg config.DiscordConfig, dg *discordgo.Session, logger *zap.SugaredLogger, wg *sync.WaitGroup) {
+	defer wg.Done()
 	handler := &messageHandler{ss13Config: ss13Cfg, oocChannelID: cfg.OOCChannelID, logger: logger}
-	logger.Debug("registering dooc message handler...")
+	logger.Debug("registering handler and listening for messages...")
 	dg.AddHandler(handler.handle)
 
-	// and then just wait here until the end of times (or an interrupt)
-	stop := make(chan os.Signal, 1)
-	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
-	<-stop
+	// keep processing unsent messages if any
+	for {
+		msgs, err := dg.ChannelMessages(cfg.OOCChannelID, 50, "", "", "")
+		if err != nil {
+			logger.Errorf("failed to get messages from the ooc channel: %w", err)
+		}
+		for _, msg := range msgs {
+			if strings.HasPrefix(msg.Content, retryMarker) {
+				handler.retryMessage(msg)
+			}
+		}
+		time.Sleep(time.Minute)
+	}
 }
 
 func (h *messageHandler) handle(s *discordgo.Session, m *discordgo.MessageCreate) {
@@ -36,32 +47,35 @@ func (h *messageHandler) handle(s *discordgo.Session, m *discordgo.MessageCreate
 	if m.Author.ID == s.State.User.ID {
 		return
 	}
-	// currently only process ooc messages
+	// currently only process dooc messages
 	if m.ChannelID != h.oocChannelID {
 		return
 	}
 
 	// TODO(rufus): permission check
 
-	// relay messsage into the game
-	h.sendDOOCMessage(m.Author.Username, m.Content, h.ss13Config.ServerAddress, h.ss13Config.AccessKey)
-
 	// delete old message from the user
-	err := s.ChannelMessageDelete(m.ChannelID, m.ID)
+	err := h.discord.ChannelMessageDelete(m.ChannelID, m.ID)
 	if err != nil {
 		h.logger.Errorf("failed to delete a DOOC message from the channel: %v", err)
 	}
 
 	// post a new formatted message with the same content
 	formattedMessage := fmt.Sprintf("<t:%d:t> `**[DOOC]**` **%s**: %s", time.Now().Unix(), m.Author.Username, m.Content)
-	_, err = s.ChannelMessageSend(m.ChannelID, formattedMessage)
+	doocMessage, err := h.discord.ChannelMessageSend(m.ChannelID, formattedMessage)
 	if err != nil {
 		h.logger.Errorf("failed to send dooc message to discord: %v", err)
 	}
 
+	// relay messsage into the game
+	err = h.sendDOOCMessageToSS13(m.Author.Username, m.Content, h.ss13Config.ServerAddress, h.ss13Config.AccessKey)
+	if err != nil {
+		h.logger.Errorf("failed to send dooc message into the game: %v", err)
+		h.discord.ChannelMessageEdit(doocMessage.ChannelID, doocMessage.ID, fmt.Sprintf(":hourglass: %s", doocMessage.Content))
+	}
 }
 
-func (h *messageHandler) sendDOOCMessage(sender, message, serverAddress, accessKey string) error {
+func (h *messageHandler) sendDOOCMessageToSS13(sender, message, serverAddress, accessKey string) error {
 	h.logger.Debugf("sending dooc:  %s: %s", sender, message)
 	request := fmt.Sprintf("dooc&sender_key=%s&message=%s&key=%s", sender, message, accessKey)
 	resp, err := ss13.SendRequest(serverAddress, []byte(request))
@@ -70,4 +84,19 @@ func (h *messageHandler) sendDOOCMessage(sender, message, serverAddress, accessK
 	}
 	h.logger.Debugf("dooc topic response: %s", string(resp))
 	return nil
+}
+
+func (h *messageHandler) retryMessage(m *discordgo.Message) {
+	if !strings.HasPrefix(m.Content, retryMarker) {
+		h.logger.Errorf("message %s was retried without having a retry marker, contents: [%s]", m.ID, m.Content)
+		return
+	}
+	msgContent := m.Content[len(retryMarker)+1:]
+	err := h.sendDOOCMessageToSS13(m.Author.Username, msgContent, h.ss13Config.ServerAddress, h.ss13Config.AccessKey)
+	if err != nil {
+		h.logger.Debugf("dooc message retry failed: %v", err)
+		return
+	}
+	// successful retry, message was sent!
+	h.discord.ChannelMessageEdit(m.ChannelID, m.ID, msgContent)
 }
