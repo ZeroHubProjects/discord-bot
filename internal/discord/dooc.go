@@ -23,7 +23,7 @@ type messageHandler struct {
 
 func RunDOOC(ss13Cfg config.SS13Config, cfg config.DiscordConfig, dg *discordgo.Session, logger *zap.SugaredLogger, wg *sync.WaitGroup) {
 	defer wg.Done()
-	handler := &messageHandler{ss13Config: ss13Cfg, oocChannelID: cfg.OOCChannelID, logger: logger}
+	handler := &messageHandler{ss13Config: ss13Cfg, oocChannelID: cfg.OOCChannelID, discord: dg, logger: logger}
 	logger.Debug("registering handler and listening for messages...")
 	dg.AddHandler(handler.handle)
 
@@ -42,33 +42,38 @@ func RunDOOC(ss13Cfg config.SS13Config, cfg config.DiscordConfig, dg *discordgo.
 	}
 }
 
-func (h *messageHandler) handle(s *discordgo.Session, m *discordgo.MessageCreate) {
+func (h *messageHandler) handle(sess *discordgo.Session, msg *discordgo.MessageCreate) {
+	defer func() {
+		if err := recover(); err != nil {
+			h.logger.Errorf("dooc message handler panicked: %v", err)
+		}
+	}()
 	// ignore own messages
-	if m.Author.ID == s.State.User.ID {
+	if msg.Author.ID == sess.State.User.ID {
 		return
 	}
 	// currently only process dooc messages
-	if m.ChannelID != h.oocChannelID {
+	if msg.ChannelID != h.oocChannelID {
 		return
 	}
 
 	// TODO(rufus): permission check
 
 	// delete old message from the user
-	err := h.discord.ChannelMessageDelete(m.ChannelID, m.ID)
+	err := h.discord.ChannelMessageDelete(msg.ChannelID, msg.ID)
 	if err != nil {
 		h.logger.Errorf("failed to delete a DOOC message from the channel: %v", err)
 	}
 
 	// post a new formatted message with the same content
-	formattedMessage := fmt.Sprintf("<t:%d:t> DOOC **%s**: %s", time.Now().Unix(), m.Author.Username, m.Content)
-	doocMessage, err := h.discord.ChannelMessageSend(m.ChannelID, formattedMessage)
+	formattedMessage := fmt.Sprintf("<t:%d:t> DOOC **%s**: %s", time.Now().Unix(), msg.Author.Username, msg.Content)
+	doocMessage, err := h.discord.ChannelMessageSend(msg.ChannelID, formattedMessage)
 	if err != nil {
 		h.logger.Errorf("failed to send dooc message to discord: %v", err)
 	}
 
 	// relay messsage into the game
-	err = h.sendDOOCMessageToSS13(m.Author.Username, m.Content, h.ss13Config.ServerAddress, h.ss13Config.AccessKey)
+	err = h.sendDOOCMessageToSS13(msg.Author.Username, msg.Content, h.ss13Config.ServerAddress, h.ss13Config.AccessKey)
 	if err != nil {
 		h.logger.Errorf("failed to send dooc message into the game: %v", err)
 		h.discord.ChannelMessageEdit(doocMessage.ChannelID, doocMessage.ID, fmt.Sprintf(":hourglass: %s", doocMessage.Content))
