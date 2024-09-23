@@ -2,6 +2,7 @@ package discord
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 	"sync"
 	"time"
@@ -87,21 +88,31 @@ func (h *messageHandler) sendDOOCMessageToSS13(sender, message, serverAddress, a
 	if err != nil {
 		return fmt.Errorf("failed to send request: %w", err)
 	}
+	if resp == nil {
+		return fmt.Errorf("empty response from the server")
+	}
 	h.logger.Debugf("dooc topic response: %s", string(resp))
 	return nil
 }
 
-func (h *messageHandler) retryMessage(m *discordgo.Message) {
-	if !strings.HasPrefix(m.Content, retryMarker) {
-		h.logger.Errorf("message %s was retried without having a retry marker, contents: [%s]", m.ID, m.Content)
+func (h *messageHandler) retryMessage(msg *discordgo.Message) {
+	if !strings.HasPrefix(msg.Content, retryMarker) {
+		h.logger.Errorf("message %s was retried without having a retry marker, contents: [%s]", msg.ID, msg.Content)
 		return
 	}
-	msgContent := m.Content[len(retryMarker)+1:]
-	err := h.sendDOOCMessageToSS13(m.Author.Username, msgContent, h.ss13Config.ServerAddress, h.ss13Config.AccessKey)
+
+	botMsgContents := msg.Content[len(retryMarker)+1:]
+	re := regexp.MustCompile(`<t:\d+:t> DOOC \*\*(.+?)\*\*: (.+)`)
+	matches := re.FindStringSubmatch(botMsgContents)
+	if len(matches) != 3 {
+		h.logger.Warnf("failed to parse dooc message for retry: %v", botMsgContents)
+		return
+	}
+	err := h.sendDOOCMessageToSS13(matches[1], matches[2], h.ss13Config.ServerAddress, h.ss13Config.AccessKey)
 	if err != nil {
 		h.logger.Debugf("dooc message retry failed: %v", err)
 		return
 	}
 	// successful retry, message was sent!
-	h.discord.ChannelMessageEdit(m.ChannelID, m.ID, msgContent)
+	h.discord.ChannelMessageEdit(msg.ChannelID, msg.ID, botMsgContents)
 }

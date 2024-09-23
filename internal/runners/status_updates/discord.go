@@ -27,9 +27,7 @@ type statusUpdater struct {
 func (s *statusUpdater) updateServerStatus() error {
 	serverStatus, err := getServerStatus(s.ss13ServerAddress)
 	if err != nil {
-		s.logger.Warnf("failed to get server status: %v", err)
-		serverStatus.RoundTime = "Unknown... (Server restarting or stopped)"
-		serverStatus.Map = "Unknown..."
+		return fmt.Errorf("failed to get server status: %w", err)
 	}
 
 	msgs, err := s.discord.ChannelMessages(s.statusChannelID, 10, "", "", "")

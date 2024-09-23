@@ -20,6 +20,11 @@ func getServerStatus(serverAddress string) (serverStatus, error) {
 	if err != nil {
 		return result, fmt.Errorf("failed to send request: %w", err)
 	}
+	if resp == nil {
+		result.RoundTime = "Unknown... (Server restarting or stopped)"
+		result.Map = "Unknown..."
+		return result, nil
+	}
 	err = json.Unmarshal(resp, &result)
 	if err != nil {
 		return result, fmt.Errorf("failed to unmarshal: %w", err)

@@ -64,8 +64,8 @@ func decodePacket(packet []byte) ([]byte, error) {
 		} else if packet[4] == 0x06 { // ASCII string response
 			// size includes type byte, so subtract 1 from the length
 			return packet[5 : 5+size-1], nil
-		} else if packet[4] == 0x00 { // world hasn't loaded or an error
-			return []byte{}, fmt.Errorf("error response from the server")
+		} else if packet[4] == 0x00 { // world not initialized, empty response or a runtime
+			return nil, nil
 		}
 	}
 	return nil, fmt.Errorf("unknown packet type: %#x, full message: [% x]", packet[4], packet)
