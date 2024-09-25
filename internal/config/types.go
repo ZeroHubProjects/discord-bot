@@ -9,8 +9,8 @@ type Config struct {
 
 type ModulesConfig struct {
 	StatusUpdatesEnabled bool           `mapstructure:"status_updates_enabled"`
-	Webhooks             WebhooksConfig `mapstructure:"webhooks"`
 	DOOCEnabled          bool           `mapstructure:"dooc_enabled"`
+	Webhooks             WebhooksConfig `mapstructure:"webhooks"`
 }
 
 type WebhooksConfig struct {

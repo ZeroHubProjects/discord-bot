@@ -1,4 +1,4 @@
-package webhooks_server
+package webhooks
 
 import (
 	"fmt"

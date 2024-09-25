@@ -1,4 +1,4 @@
-package webhooks_server
+package webhooks
 
 import (
 	"encoding/json"
@@ -52,11 +52,11 @@ func (h *webhookHandler) checkAuthorization(key string) bool {
 }
 
 func (h *webhookHandler) handleResponse(r response, w http.ResponseWriter) {
-	h.logger.Debugf("webhook response: %d %s %s", r.statusCode, r.Code, r.Details)
+	h.logger.Debugf("response: %d %s %s", r.statusCode, r.Code, r.Details)
 	w.WriteHeader(r.statusCode)
 	err := json.NewEncoder(w).Encode(r)
 	if err != nil {
-		h.logger.Error("failed to encode webhook response")
+		h.logger.Error("failed to encode response")
 	}
 }
 
@@ -81,7 +81,7 @@ func (h *webhookHandler) handleOOC(data string, authorized bool) response {
 	}
 	err = discord.EnqueueOOCMessage(msg)
 	if err != nil {
-		h.logger.Errorf("failed to enqueue ooc message: %v", err)
+		h.logger.Errorf("failed to enqueue message: %v", err)
 		return getResponse(http.StatusServiceUnavailable, codeInternalServerError, err.Error())
 	}
 	return SuccessResponse

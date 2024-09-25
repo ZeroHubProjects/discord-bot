@@ -2,16 +2,17 @@
 debug_log: true
 
 modules:
-  # Main switch for the status updater module that will query your server and post that information on discord
+  # Status updater module that will query your server and post that information on discord
   status_updates_enabled: true
-  # Switch for the DOOC (Discord OOC) module, which listens to messages in the ooc channel and relays them into the game
+  # DOOC (Discord OOC) module, listens to messages in the ooc channel and relays them to the game
   dooc_enabled: true
+  # Webhooks are used to receive events from the game and act on them, mainly relay them to discord
   webhooks:
     # Global switch for webhook handling, all webhooks endpoints will only work if this is enabled
     enabled: true
     # Network port on which webhooks server will be listening for the requests
     port: 14081
-    # Individual webhook endpoints
+    # OOC webhook, accepts ooc message webhooks from the game and relays them to the ooc channel in discord
     ooc_messages_enabled: true
 
 ss13:

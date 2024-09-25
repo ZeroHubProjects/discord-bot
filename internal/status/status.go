@@ -1,4 +1,4 @@
-package statusupdates
+package status
 
 import (
 	"sync"
@@ -10,11 +10,11 @@ import (
 
 var interval = time.Minute
 
-func Run(ss13ServerAddress, statusChannelID string, dg *discordgo.Session, logger *zap.SugaredLogger, wg *sync.WaitGroup) {
+func Run(ss13ServerAddress, statusChannelID string, discord *discordgo.Session, logger *zap.SugaredLogger, wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	statusUpdater := statusUpdater{
-		discord:           dg,
+		discord:           discord,
 		ss13ServerAddress: ss13ServerAddress,
 		statusChannelID:   statusChannelID,
 		logger:            logger,
@@ -30,14 +30,14 @@ func Run(ss13ServerAddress, statusChannelID string, dg *discordgo.Session, logge
 func runStatusUpdatesLoop(statusUpdater *statusUpdater, logger *zap.SugaredLogger) {
 	defer func() {
 		if err := recover(); err != nil {
-			logger.Errorf("status updater panicked: %v", err)
+			logger.Errorf("panicked: %v", err)
 		}
 	}()
 
 	for {
-		err := statusUpdater.updateServerStatus()
+		err := statusUpdater.update()
 		if err != nil {
-			logger.Errorf("failed to update server status: %v", err)
+			logger.Errorf("failed to update: %v", err)
 		}
 		time.Sleep(interval)
 	}

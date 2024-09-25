@@ -1,4 +1,4 @@
-package statusupdates
+package status
 
 const (
 	/*

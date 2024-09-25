@@ -1,4 +1,4 @@
-package statusupdates
+package status
 
 import (
 	"bytes"
@@ -14,7 +14,7 @@ import (
 const (
 	serverName  = "ZeroOnyx"
 	githubLink  = "Temporarily Private"
-	serverColor = 16725342 // discord accepts color in decimal, this is #FF355E aka Radical Red
+	serverColor = 0xFF355E // hex color as decimal, Radical Red
 )
 
 type statusUpdater struct {
@@ -24,7 +24,7 @@ type statusUpdater struct {
 	logger            *zap.SugaredLogger
 }
 
-func (s *statusUpdater) updateServerStatus() error {
+func (s *statusUpdater) update() error {
 	serverStatus, err := getServerStatus(s.ss13ServerAddress)
 	if err != nil {
 		return fmt.Errorf("failed to get server status: %w", err)
@@ -32,7 +32,7 @@ func (s *statusUpdater) updateServerStatus() error {
 
 	msgs, err := s.discord.ChannelMessages(s.statusChannelID, 10, "", "", "")
 	if err != nil {
-		return fmt.Errorf("failed to get messages from the status updates channel: %w", err)
+		return fmt.Errorf("failed to get messages from the channel: %w", err)
 	}
 
 	var statusMessage *discordgo.Message
@@ -44,7 +44,7 @@ func (s *statusUpdater) updateServerStatus() error {
 
 	newMessageDescription, err := s.getStatusMessageDescription(serverStatus)
 	if err != nil {
-		return fmt.Errorf("failed to create new status update message description: %w", err)
+		return fmt.Errorf("failed to create new message description: %w", err)
 	}
 
 	embed := &discordgo.MessageEmbed{
@@ -58,13 +58,13 @@ func (s *statusUpdater) updateServerStatus() error {
 		newMessage := discordgo.MessageSend{Embeds: []*discordgo.MessageEmbed{embed}}
 		_, err := s.discord.ChannelMessageSendComplex(s.statusChannelID, &newMessage)
 		if err != nil {
-			return fmt.Errorf("failed to post status message: %w", err)
+			return fmt.Errorf("failed to post message: %w", err)
 		}
 	} else {
 		newEdit := discordgo.NewMessageEdit(s.statusChannelID, statusMessage.ID).SetEmbed(embed)
 		_, err := s.discord.ChannelMessageEditComplex(newEdit)
 		if err != nil {
-			return fmt.Errorf("failed to update status message: %w", err)
+			return fmt.Errorf("failed to update message: %w", err)
 		}
 	}
 	return nil
