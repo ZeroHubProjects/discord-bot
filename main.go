@@ -6,6 +6,7 @@ import (
 	"github.com/ZeroHubProjects/discord-bot/internal/config"
 	"github.com/ZeroHubProjects/discord-bot/internal/discord"
 	"github.com/ZeroHubProjects/discord-bot/internal/discord/dooc"
+	"github.com/ZeroHubProjects/discord-bot/internal/discord/verification"
 	"github.com/ZeroHubProjects/discord-bot/internal/status"
 	"github.com/ZeroHubProjects/discord-bot/internal/webhooks"
 	"github.com/bwmarrin/discordgo"
@@ -58,6 +59,11 @@ func main() {
 	if cfg.Modules.DOOCEnabled {
 		wg.Add(1)
 		go dooc.RunDOOC(cfg.SS13, cfg.Discord, dg, logger.Named("discord.dooc"), wg)
+	}
+	// verification processing
+	if cfg.Modules.BYONDVerificationEnabled {
+		wg.Add(1)
+		go verification.RunBYONDVerification(cfg.Discord, dg, logger.Named("verification"), wg)
 	}
 
 	dg.Open()

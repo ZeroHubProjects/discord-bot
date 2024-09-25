@@ -6,6 +6,8 @@ modules:
   status_updates_enabled: true
   # DOOC (Discord OOC) module, listens to messages in the ooc channel and relays them to the game
   dooc_enabled: true
+  # BYOND account verification module, provides instructions on how to verify an account in a separate channel and handles interactions
+  byond_verification_enabled: true
   # Webhooks are used to receive events from the game and act on them, mainly relay them to discord
   webhooks:
     # Global switch for webhook handling, all webhooks endpoints will only work if this is enabled
@@ -30,3 +32,5 @@ discord:
   status_channel_id: "1283679676895858750"
   # Discord channel where OOC messages will be posted and DOOC messages will be accepted
   ooc_channel_id: "1283485860968534066"
+  # Discord channel holding the BYOND verification instructions and interaction components
+  byond_verification_channel_id: "1287044820392611953"

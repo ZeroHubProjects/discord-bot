@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/ZeroHubProjects/discord-bot/internal/config"
+	"github.com/ZeroHubProjects/discord-bot/internal/discord/verification"
 	"github.com/ZeroHubProjects/discord-bot/internal/ss13"
 	"github.com/bwmarrin/discordgo"
 	"go.uber.org/zap"
@@ -20,15 +21,18 @@ type messageHandler struct {
 	oocChannelID string
 	discord      *discordgo.Session
 	logger       *zap.SugaredLogger
+	// if verificationHandler is nil, BYOND account verification won't be required and Discord username will be used as the sender name
+	verificationHandler *verification.ByondVerificationHandler
 }
 
 func RunDOOC(ss13Cfg config.SS13Config, cfg config.DiscordConfig, discord *discordgo.Session, logger *zap.SugaredLogger, wg *sync.WaitGroup) {
 	defer wg.Done()
 	handler := &messageHandler{
-		ss13Config:   ss13Cfg,
-		oocChannelID: cfg.OOCChannelID,
-		discord:      discord,
-		logger:       logger,
+		ss13Config:          ss13Cfg,
+		oocChannelID:        cfg.OOCChannelID,
+		discord:             discord,
+		logger:              logger,
+		verificationHandler: nil, // disabled until verification module is complete
 	}
 	logger.Debug("registering handler and listening for messages...")
 	discord.AddHandler(handler.handleDOOC)
@@ -69,7 +73,15 @@ func (h *messageHandler) handleDOOC(sess *discordgo.Session, msg *discordgo.Mess
 		h.logger.Errorf("failed to delete message from the channel: %v", err)
 	}
 
-	// TODO(rufus): verification handler
+	// TODO(rufus): finish verification handler implementation
+	if h.verificationHandler != nil {
+		h.logger.Debug("user unauthorized, sending them to verification")
+		err := h.verificationHandler.SendUserToVerification(msg.Author.ID)
+		if err != nil {
+			h.logger.Errorf("failed to send user to verification: %v", err)
+		}
+		return
+	}
 
 	// post a new formatted message with the same content
 	formattedMessage := fmt.Sprintf("<t:%d:t> DOOC **%s**: %s", time.Now().Unix(), msg.Author.Username, msg.Content)

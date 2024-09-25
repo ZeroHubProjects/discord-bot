@@ -8,9 +8,10 @@ type Config struct {
 }
 
 type ModulesConfig struct {
-	StatusUpdatesEnabled bool           `mapstructure:"status_updates_enabled"`
-	DOOCEnabled          bool           `mapstructure:"dooc_enabled"`
-	Webhooks             WebhooksConfig `mapstructure:"webhooks"`
+	StatusUpdatesEnabled     bool           `mapstructure:"status_updates_enabled"`
+	DOOCEnabled              bool           `mapstructure:"dooc_enabled"`
+	BYONDVerificationEnabled bool           `mapstructure:"byond_verification_enabled"`
+	Webhooks                 WebhooksConfig `mapstructure:"webhooks"`
 }
 
 type WebhooksConfig struct {
@@ -25,7 +26,8 @@ type SS13Config struct {
 }
 
 type DiscordConfig struct {
-	BotToken        string `mapstructure:"bot_token"`
-	OOCChannelID    string `mapstructure:"ooc_channel_id"`
-	StatusChannelID string `mapstructure:"status_channel_id"`
+	BotToken                   string `mapstructure:"bot_token"`
+	OOCChannelID               string `mapstructure:"ooc_channel_id"`
+	StatusChannelID            string `mapstructure:"status_channel_id"`
+	BYONDVerificationChannelID string `mapstructure:"byond_verification_channel_id"`
 }
