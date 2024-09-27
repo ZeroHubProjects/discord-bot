@@ -10,32 +10,32 @@ import (
 	"go.uber.org/zap"
 )
 
-var (
-	oocQueueSize = 100
-	// TODO(rufus): refactor to a channel managed by main, refactor OOC relay to a runner
-	//   pass the channel to it and to the webhooks server thus decoupling the modules
-	oocMessageQueue = make(chan types.OOCMessage, oocQueueSize)
-)
+const interval = time.Minute
 
-// ooc messages are enqueued so there is some buffer to accomodate for interruptions
-// and allow webhook to immediately return to the game
-func EnqueueOOCMessage(msg types.OOCMessage) error {
-	select {
-	case oocMessageQueue <- msg:
-		return nil
-	default:
-		return fmt.Errorf("queue is full, %d messages", oocQueueSize)
+type OOCRelay struct {
+	Queue     chan types.OOCMessage
+	ChannelID string
+	Discord   *discordgo.Session
+	Logger    *zap.SugaredLogger
+}
+
+func (r *OOCRelay) Run(wg *sync.WaitGroup) {
+	defer wg.Done()
+
+	for {
+		r.runOOCRelay()
+		r.Logger.Debugf("restarting in %v...", interval)
+		time.Sleep(interval)
 	}
 }
 
-func RunOOCProcessingLoop(channelID string, discord *discordgo.Session, logger *zap.SugaredLogger, wg *sync.WaitGroup) {
-	defer wg.Done()
+func (r *OOCRelay) runOOCRelay() {
 	for {
-		msg := <-oocMessageQueue
+		msg := <-r.Queue
 		formattedMessage := fmt.Sprintf("<t:%d:t> **%s**: %s", time.Now().Unix(), msg.SenderKey, msg.Message)
-		_, err := discord.ChannelMessageSend(channelID, formattedMessage)
+		_, err := r.Discord.ChannelMessageSend(r.ChannelID, formattedMessage)
 		if err != nil {
-			logger.Errorf("failed to send ooc message to discord: %v", err)
+			r.Logger.Errorf("failed to send ooc message to discord: %v", err)
 		}
 	}
 }

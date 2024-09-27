@@ -6,6 +6,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/ZeroHubProjects/discord-bot/internal/types"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"go.uber.org/zap"
@@ -17,6 +18,7 @@ type WebhookServer struct {
 	Port               int
 	SS13AccessKey      string
 	OOCMessagesEnabled bool
+	OOCMessageQueue    chan types.OOCMessage
 	Logger             *zap.SugaredLogger
 }
 
@@ -38,9 +40,10 @@ func (s *WebhookServer) runServer() {
 	}()
 
 	handler := webhookHandler{
-		accessKey:  s.SS13AccessKey,
-		oocEnabled: s.OOCMessagesEnabled,
-		logger:     s.Logger,
+		accessKey:       s.SS13AccessKey,
+		oocEnabled:      s.OOCMessagesEnabled,
+		oocMessageQueue: s.OOCMessageQueue,
+		logger:          s.Logger,
 	}
 
 	r := chi.NewRouter()

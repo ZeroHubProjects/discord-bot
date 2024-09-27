@@ -8,6 +8,7 @@ import (
 	"github.com/ZeroHubProjects/discord-bot/internal/discord/relay"
 	"github.com/ZeroHubProjects/discord-bot/internal/discord/verification"
 	"github.com/ZeroHubProjects/discord-bot/internal/status"
+	"github.com/ZeroHubProjects/discord-bot/internal/types"
 	"github.com/ZeroHubProjects/discord-bot/internal/webhooks"
 	"github.com/bwmarrin/discordgo"
 	"github.com/joho/godotenv"
@@ -61,12 +62,20 @@ func main() {
 			OOCMessagesEnabled: cfg.Modules.Webhooks.OOCMessagesEnabled,
 			Logger:             logger.Named("webhooks"),
 		}
-		go server.Run(wg)
 		// OOC to discord relay
 		if cfg.Modules.Webhooks.OOCMessagesEnabled {
 			wg.Add(1)
-			go relay.RunOOCProcessingLoop(cfg.Discord.OOCChannelID, dg, logger.Named("relay.ooc"), wg)
+			server.OOCMessageQueue = make(chan types.OOCMessage, 5)
+			relay := relay.OOCRelay{
+				Queue:     server.OOCMessageQueue,
+				ChannelID: cfg.Discord.OOCChannelID,
+				Discord:   dg,
+				Logger:    logger.Named("relay.ooc"),
+			}
+			go relay.Run(wg)
 		}
+		go server.Run(wg)
+
 	}
 	// discord ooc channel processing
 	if cfg.Modules.DOOCEnabled {
