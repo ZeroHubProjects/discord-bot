@@ -1,32 +1,33 @@
 package config
 
-import (
-	"fmt"
+type Config struct {
+	DebugLog bool          `mapstructure:"debug_log"`
+	Modules  ModulesConfig `mapstructure:"modules"`
+	SS13     SS13Config    `mapstructure:"ss13"`
+	Discord  DiscordConfig `mapstructure:"discord"`
+}
 
-	"github.com/spf13/afero"
-	"github.com/spf13/viper"
-)
+type ModulesConfig struct {
+	StatusUpdatesEnabled     bool           `mapstructure:"status_updates_enabled"`
+	DOOCEnabled              bool           `mapstructure:"dooc_enabled"`
+	BYONDVerificationEnabled bool           `mapstructure:"byond_verification_enabled"`
+	Webhooks                 WebhooksConfig `mapstructure:"webhooks"`
+}
 
-func GetConfig(fs afero.Fs) (Config, error) {
-	// configuration
-	config := Config{}
+type WebhooksConfig struct {
+	Enabled            bool `mapstructure:"enabled"`
+	Port               int  `mapstructure:"port"`
+	OOCMessagesEnabled bool `mapstructure:"ooc_messages_enabled"`
+}
 
-	viper.SetEnvPrefix("VIPER")
-	viper.MustBindEnv("CONFIG")
-	configPath := viper.GetString("CONFIG")
-	viper.SetConfigFile(configPath)
+type SS13Config struct {
+	ServerAddress string `mapstructure:"server_address"`
+	AccessKey     string `mapstructure:"access_key"`
+}
 
-	viper.SetFs(fs)
-
-	err := viper.ReadInConfig()
-	if err != nil {
-		return config, fmt.Errorf("failed to read config: %w", err)
-	}
-	err = viper.Unmarshal(&config)
-	if err != nil {
-		return config, fmt.Errorf("failed to unmarshal config: %w", err)
-	}
-
-	// TODO(rufus): add config validation
-	return config, err
+type DiscordConfig struct {
+	BotToken                   string `mapstructure:"bot_token"`
+	OOCChannelID               string `mapstructure:"ooc_channel_id"`
+	StatusChannelID            string `mapstructure:"status_channel_id"`
+	BYONDVerificationChannelID string `mapstructure:"byond_verification_channel_id"`
 }
