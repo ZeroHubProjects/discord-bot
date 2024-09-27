@@ -1,10 +1,6 @@
 package verification
 
 import (
-	"sync"
-	"time"
-
-	"github.com/ZeroHubProjects/discord-bot/internal/config"
 	"github.com/bwmarrin/discordgo"
 	"go.uber.org/zap"
 )
@@ -13,25 +9,6 @@ type ByondVerificationHandler struct {
 	Discord   *discordgo.Session
 	ChannelID string
 	Logger    *zap.SugaredLogger
-}
-
-func RunBYONDVerification(cfg config.DiscordConfig, discord *discordgo.Session, logger *zap.SugaredLogger, wg *sync.WaitGroup) {
-	defer wg.Done()
-
-	handler := ByondVerificationHandler{
-		Discord:   discord,
-		ChannelID: cfg.BYONDVerificationChannelID,
-		Logger:    logger,
-	}
-
-	logger.Debug("checking verification message and registering handlers...")
-	handler.updateVerificationMessage()
-	discord.AddHandler(handler.handleInteraction)
-
-	for {
-		// NOTE(rufus): add routine tasks as required
-		time.Sleep(time.Minute)
-	}
 }
 
 func (h *ByondVerificationHandler) handleInteraction(sess *discordgo.Session, interaction *discordgo.InteractionCreate) {

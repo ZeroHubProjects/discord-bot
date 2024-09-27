@@ -1,4 +1,4 @@
-package discord
+package relay
 
 import (
 	"fmt"
@@ -11,7 +11,9 @@ import (
 )
 
 var (
-	oocQueueSize    = 100
+	oocQueueSize = 100
+	// TODO(rufus): refactor to a channel managed by main, refactor OOC relay to a runner
+	//   pass the channel to it and to the webhooks server thus decoupling the modules
 	oocMessageQueue = make(chan types.OOCMessage, oocQueueSize)
 )
 

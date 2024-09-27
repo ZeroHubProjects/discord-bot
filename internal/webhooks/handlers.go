@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/ZeroHubProjects/discord-bot/internal/discord"
+	"github.com/ZeroHubProjects/discord-bot/internal/discord/relay"
 	"github.com/ZeroHubProjects/discord-bot/internal/types"
 	"go.uber.org/zap"
 )
@@ -79,7 +79,7 @@ func (h *webhookHandler) handleOOC(data string, authorized bool) response {
 	if msg.SenderKey == "" || msg.Message == "" {
 		return getResponse(http.StatusBadRequest, codeMalformedData, "Both `ckey` and `message` are required in the `data`")
 	}
-	err = discord.EnqueueOOCMessage(msg)
+	err = relay.EnqueueOOCMessage(msg)
 	if err != nil {
 		h.logger.Errorf("failed to enqueue message: %v", err)
 		return getResponse(http.StatusServiceUnavailable, codeInternalServerError, err.Error())

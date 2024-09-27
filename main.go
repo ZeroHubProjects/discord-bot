@@ -4,8 +4,8 @@ import (
 	"sync"
 
 	"github.com/ZeroHubProjects/discord-bot/internal/config"
-	"github.com/ZeroHubProjects/discord-bot/internal/discord"
 	"github.com/ZeroHubProjects/discord-bot/internal/discord/dooc"
+	"github.com/ZeroHubProjects/discord-bot/internal/discord/relay"
 	"github.com/ZeroHubProjects/discord-bot/internal/discord/verification"
 	"github.com/ZeroHubProjects/discord-bot/internal/status"
 	"github.com/ZeroHubProjects/discord-bot/internal/webhooks"
@@ -44,26 +44,52 @@ func main() {
 	// status updater module
 	if cfg.Modules.StatusUpdatesEnabled {
 		wg.Add(1)
-		go status.Run(cfg.SS13.ServerAddress, cfg.Discord.StatusChannelID, dg, logger.Named("status_updates"), wg)
+		statusUpdater := status.StatusUpdater{
+			Discord:           dg,
+			SS13ServerAddress: cfg.SS13.ServerAddress,
+			StatusChannelID:   cfg.Discord.StatusChannelID,
+			Logger:            logger.Named("status_updates"),
+		}
+		go statusUpdater.Run(wg)
 	}
 	// webhooks server module
 	if cfg.Modules.Webhooks.Enabled {
 		wg.Add(1)
-		go webhooks.Run(cfg.SS13.AccessKey, cfg.Modules.Webhooks, logger.Named("webhooks"), wg)
+		server := webhooks.WebhookServer{
+			Port:               cfg.Modules.Webhooks.Port,
+			SS13AccessKey:      cfg.SS13.AccessKey,
+			OOCMessagesEnabled: cfg.Modules.Webhooks.OOCMessagesEnabled,
+			Logger:             logger.Named("webhooks"),
+		}
+		go server.Run(wg)
+		// OOC to discord relay
 		if cfg.Modules.Webhooks.OOCMessagesEnabled {
 			wg.Add(1)
-			go discord.RunOOCProcessingLoop(cfg.Discord.OOCChannelID, dg, logger.Named("webhooks.ooc.processing"), wg)
+			go relay.RunOOCProcessingLoop(cfg.Discord.OOCChannelID, dg, logger.Named("relay.ooc"), wg)
 		}
 	}
 	// discord ooc channel processing
 	if cfg.Modules.DOOCEnabled {
 		wg.Add(1)
-		go dooc.RunDOOC(cfg.SS13, cfg.Discord, dg, logger.Named("discord.dooc"), wg)
+		handler := dooc.DOOCHandler{
+			SS13ServerAddress:   cfg.SS13.ServerAddress,
+			SS13AccessKey:       cfg.SS13.AccessKey,
+			OOCChannelID:        cfg.Discord.OOCChannelID,
+			Discord:             dg,
+			Logger:              logger.Named("dooc"),
+			VerificationHandler: nil, // disabled until verification module is complete
+		}
+		go handler.Run(wg)
 	}
 	// verification processing
 	if cfg.Modules.BYONDVerificationEnabled {
 		wg.Add(1)
-		go verification.RunBYONDVerification(cfg.Discord, dg, logger.Named("verification"), wg)
+		handler := verification.ByondVerificationHandler{
+			Discord:   dg,
+			ChannelID: cfg.Discord.BYONDVerificationChannelID,
+			Logger:    logger.Named("verification"),
+		}
+		go handler.Run(wg)
 	}
 
 	dg.Open()
