@@ -82,12 +82,12 @@ func main() {
 		go server.Run(wg)
 	}
 	// verification processing
-	var verificationHandler verification.ByondVerificationHandler // keep a reference so other modules can use it
+	var verificationHandler *verification.ByondVerificationHandler // keep a reference so other modules can use it
 	if cfg.Modules.BYONDVerificationEnabled {
 		if dberr != nil {
 			logger.Fatalf("failed to establish a required database connection for the verification module: %v", dberr)
 		}
-		verificationHandler = verification.ByondVerificationHandler{
+		verificationHandler = &verification.ByondVerificationHandler{
 			Discord:   dg,
 			ChannelID: cfg.Discord.BYONDVerificationChannelID,
 			Logger:    logger.Named("verification"),
@@ -104,7 +104,7 @@ func main() {
 			OOCChannelID:        cfg.Discord.OOCChannelID,
 			Discord:             dg,
 			Logger:              logger.Named("dooc"),
-			VerificationHandler: &verificationHandler,
+			VerificationHandler: verificationHandler, // might be nil if verification is not enabled in the config
 		}
 		wg.Add(1)
 		go handler.Run(wg)
