@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"runtime/debug"
 	"strings"
 
 	"go.uber.org/zap"
@@ -15,7 +16,7 @@ func recoverMiddleware(logger *zap.SugaredLogger) func(next http.Handler) http.H
 		fn := func(w http.ResponseWriter, r *http.Request) {
 			defer func() {
 				if err := recover(); err != nil {
-					logger.Errorf("handler panicked: %v", err)
+					logger.Errorf("handler panicked: %v\nstack trace: %s", err, string(debug.Stack()))
 					w.WriteHeader(http.StatusInternalServerError)
 					json.NewEncoder(w).Encode(InternalErrorResponse)
 				}

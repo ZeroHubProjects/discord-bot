@@ -1,6 +1,7 @@
 package status
 
 import (
+	"runtime/debug"
 	"sync"
 	"time"
 )
@@ -18,7 +19,7 @@ func (s *StatusUpdater) Run(wg *sync.WaitGroup) {
 func (s *StatusUpdater) runUpdates() {
 	defer func() {
 		if err := recover(); err != nil {
-			s.Logger.Errorf("panicked: %v", err)
+			s.Logger.Errorf("panicked: %v\nstack trace: %s", err, string(debug.Stack()))
 		}
 	}()
 

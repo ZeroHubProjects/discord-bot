@@ -1,6 +1,7 @@
 package verification
 
 import (
+	"runtime/debug"
 	"sync"
 	"time"
 )
@@ -20,7 +21,7 @@ func (h *ByondVerificationHandler) Run(wg *sync.WaitGroup) {
 func (h *ByondVerificationHandler) runVerification() {
 	defer func() {
 		if err := recover(); err != nil {
-			h.Logger.Errorf("panicked: %v", err)
+			h.Logger.Errorf("handler panicked: %v\nstack trace: %s", err, string(debug.Stack()))
 		}
 	}()
 

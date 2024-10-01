@@ -3,6 +3,7 @@ package dooc
 import (
 	"fmt"
 	"regexp"
+	"runtime/debug"
 	"strings"
 	"time"
 
@@ -27,7 +28,7 @@ type DOOCHandler struct {
 func (h *DOOCHandler) handleDOOCMessage(sess *discordgo.Session, msg *discordgo.MessageCreate) {
 	defer func() {
 		if err := recover(); err != nil {
-			h.Logger.Errorf("handler panicked: %v", err)
+			h.Logger.Errorf("handler panicked: %v\nstack trace: %s", err, string(debug.Stack()))
 		}
 	}()
 	// ignore own messages

@@ -1,6 +1,7 @@
 package dooc
 
 import (
+	"runtime/debug"
 	"strings"
 	"sync"
 	"time"
@@ -21,7 +22,7 @@ func (h *DOOCHandler) Run(wg *sync.WaitGroup) {
 func (h *DOOCHandler) runDOOC() {
 	defer func() {
 		if err := recover(); err != nil {
-			h.Logger.Errorf("panicked: %v", err)
+			h.Logger.Errorf("handler panicked: %v\nstack trace: %s", err, string(debug.Stack()))
 		}
 	}()
 

@@ -3,6 +3,7 @@ package webhooks
 import (
 	"fmt"
 	"net/http"
+	"runtime/debug"
 	"sync"
 	"time"
 
@@ -34,7 +35,7 @@ func (s *WebhookServer) Run(wg *sync.WaitGroup) {
 func (s *WebhookServer) runServer() {
 	defer func() {
 		if err := recover(); err != nil {
-			s.Logger.Errorf("panicked: %v", err)
+			s.Logger.Errorf("server panicked: %v\nstack trace: %s", err, string(debug.Stack()))
 		}
 	}()
 
