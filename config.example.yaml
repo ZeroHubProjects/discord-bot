@@ -6,7 +6,7 @@ modules:
   status_updates_enabled: true
   # DOOC (Discord OOC) module, listens to messages in the ooc channel and relays them to the game
   dooc_enabled: true
-  # BYOND account verification module, provides instructions on how to verify an account in a separate channel and handles interactions
+  # BYOND account verification module, manages the channel and interactions, requires database connection
   byond_verification_enabled: true
   # Webhooks are used to receive events from the game and act on them, mainly relay them to discord
   webhooks:
@@ -34,3 +34,11 @@ discord:
   ooc_channel_id: "1283485860968534066"
   # Discord channel holding the BYOND verification instructions and interaction components
   byond_verification_channel_id: "1287044820392611953"
+
+# Credentials of the main game database, correct `verification` and `player_discord` tables must be preset
+database:
+  username: "root"
+  password: "pass"
+  address: "127.0.0.1"
+  port: "3306"
+  database_name: "onyxdb"

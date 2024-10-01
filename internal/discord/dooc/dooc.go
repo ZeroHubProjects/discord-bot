@@ -45,25 +45,33 @@ func (h *DOOCHandler) handleDOOCMessage(sess *discordgo.Session, msg *discordgo.
 		h.Logger.Errorf("failed to delete message from the channel: %v", err)
 	}
 
-	// TODO(rufus): finish verification handler implementation
+	senderName := msg.Author.Username
+	// check verification
 	if h.VerificationHandler != nil {
-		h.Logger.Debug("user unauthorized, sending them to verification")
-		err := h.VerificationHandler.SendUserToVerification(msg.Author.ID)
+		player, err := h.VerificationHandler.GetVerifiedPlayer(msg.Author.ID)
 		if err != nil {
-			h.Logger.Errorf("failed to send user to verification: %v", err)
+			h.Logger.Errorf("failed to check if player is already verified: %v", err)
+			return
 		}
-		return
+		if player == nil {
+			err := h.VerificationHandler.SendUserToVerification(msg.Author.ID)
+			if err != nil {
+				h.Logger.Errorf("failed to send user to verification: %v", err)
+			}
+			return
+		}
+		senderName = player.DisplayKey
 	}
 
 	// post a new formatted message with the same content
-	formattedMessage := fmt.Sprintf("<t:%d:t> DOOC **%s**: %s", time.Now().Unix(), msg.Author.Username, msg.Content)
+	formattedMessage := fmt.Sprintf("<t:%d:t> DOOC **%s**: %s", time.Now().Unix(), senderName, msg.Content)
 	doocMessage, err := h.Discord.ChannelMessageSend(msg.ChannelID, formattedMessage)
 	if err != nil {
 		h.Logger.Errorf("failed to send message to discord: %v", err)
 	}
 
 	// relay messsage to the game
-	err = h.sendDOOCMessageToSS13(msg.Author.Username, msg.Content)
+	err = h.sendDOOCMessageToSS13(senderName, msg.Content)
 	if err != nil {
 		h.Logger.Errorf("failed to send message to the game: %v", err)
 		h.Discord.ChannelMessageEdit(doocMessage.ChannelID, doocMessage.ID, fmt.Sprintf(":hourglass: %s", doocMessage.Content))

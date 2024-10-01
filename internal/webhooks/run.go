@@ -6,7 +6,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ZeroHubProjects/discord-bot/internal/types"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"go.uber.org/zap"
@@ -18,7 +17,7 @@ type WebhookServer struct {
 	Port               int
 	SS13AccessKey      string
 	OOCMessagesEnabled bool
-	OOCMessageQueue    chan types.OOCMessage
+	OOCMessageQueue    chan OOCMessage
 	Logger             *zap.SugaredLogger
 }
 

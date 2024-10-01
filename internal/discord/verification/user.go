@@ -7,7 +7,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-const cooldown = time.Minute
+const cooldown = time.Minute / 2
 
 // map of userID to last time they were sent to verification
 var lastUserVerificationSend = map[string]time.Time{}
@@ -35,4 +35,11 @@ func (h *ByondVerificationHandler) SendUserToVerification(userID string) error {
 	}
 	lastUserVerificationSend[userID] = time.Now().UTC()
 	return nil
+}
+
+func (h *ByondVerificationHandler) exitVerificationChannel(userID string) {
+	err := h.Discord.ChannelPermissionDelete(h.ChannelID, userID)
+	if err != nil {
+		h.Logger.Errorf("failed to remove user from the verification channel: %v")
+	}
 }

@@ -1,13 +1,18 @@
 package verification
 
-import "github.com/bwmarrin/discordgo"
+import (
+	"github.com/bwmarrin/discordgo"
+)
 
 const (
-	embedTitle       = "BYOND Account Verification"
-	embedColor       = 0x2554C7 // hex color as decimal, Sapphire Blue
-	buttonID         = "byond_verification_button"
-	buttonLabel      = "Verify"
-	embedDescription = `This is a test instruction. You can test the "Verify" button if you want!`
+	embedColor = 0x2554C7 // hex color as decimal, Sapphire Blue
+	buttonID   = "byond_verification_button"
+)
+
+var (
+	embedTitle       = lzRus[lzInstructionsTitle]
+	embedDescription = lzRus[lzInstructions]
+	buttonLabel      = lzRus[lzButtonLabel]
 )
 
 var verificationMessage = discordgo.MessageSend{
@@ -33,18 +38,20 @@ var verificationMessage = discordgo.MessageSend{
 }
 
 const (
-	modalID          = "byond_verification_modal"
-	modalTitle       = "Enter Verification Code"
-	inputID          = "verification_code_input"
-	inputLabel       = "Verification Code"
-	inputPlaceholder = "Enter the code from the game"
+	modalID = "byond_verification_modal"
+	inputID = "verification_code_input"
+)
+
+var (
+	inputLabel       = lzRus[lzInputLabel]
+	inputPlaceholder = lzRus[lzInputPlaceholder]
 )
 
 var verificationModal = &discordgo.InteractionResponse{
 	Type: discordgo.InteractionResponseModal,
 	Data: &discordgo.InteractionResponseData{
 		CustomID: modalID,
-		Title:    modalTitle,
+		Title:    embedTitle,
 		Components: []discordgo.MessageComponent{
 			discordgo.ActionsRow{
 				Components: []discordgo.MessageComponent{
@@ -56,6 +63,32 @@ var verificationModal = &discordgo.InteractionResponse{
 						Required:    true,
 					},
 				},
+			},
+		},
+	},
+}
+
+func newEphemeralInteractionResponse(content string) *discordgo.InteractionResponse {
+	return &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseChannelMessageWithSource,
+		Data: &discordgo.InteractionResponseData{
+			Content: content,
+			Flags:   discordgo.MessageFlagsEphemeral,
+		},
+	}
+}
+
+const exitButtonID = "exit_verification_button"
+
+var exitButtonLabel = lzRus[lzExitChannelButtonLabel]
+
+var exitVerificationChannelComponent = []discordgo.MessageComponent{
+	discordgo.ActionsRow{
+		Components: []discordgo.MessageComponent{
+			discordgo.Button{
+				Label:    exitButtonLabel,
+				Style:    discordgo.SecondaryButton,
+				CustomID: exitButtonID,
 			},
 		},
 	},

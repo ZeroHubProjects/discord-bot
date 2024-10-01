@@ -6,14 +6,13 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/ZeroHubProjects/discord-bot/internal/types"
 	"go.uber.org/zap"
 )
 
 type webhookHandler struct {
 	accessKey       string
 	oocEnabled      bool
-	oocMessageQueue chan types.OOCMessage
+	oocMessageQueue chan OOCMessage
 	logger          *zap.SugaredLogger
 }
 
@@ -70,7 +69,7 @@ func (h *webhookHandler) handleOOC(data string, authorized bool) response {
 	if data == "" {
 		return getResponse(http.StatusBadRequest, codeEmptyData, "A request `data` was expected, but is missing")
 	}
-	var msg types.OOCMessage
+	var msg OOCMessage
 	err := json.Unmarshal([]byte(data), &msg)
 	if err != nil {
 		err := fmt.Errorf("failed to unmarshal data: %w", err)
@@ -89,7 +88,7 @@ func (h *webhookHandler) handleOOC(data string, authorized bool) response {
 
 // ooc messages are enqueued so there is some buffer to accomodate for interruptions
 // and allow webhook to immediately return to the game
-func (h *webhookHandler) enqueueOOCMessage(msg types.OOCMessage) error {
+func (h *webhookHandler) enqueueOOCMessage(msg OOCMessage) error {
 	if h.oocMessageQueue == nil {
 		return fmt.Errorf("ooc message queue is nil but ooc message is handled")
 	}

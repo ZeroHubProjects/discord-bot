@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ZeroHubProjects/discord-bot/internal/types"
+	"github.com/ZeroHubProjects/discord-bot/internal/webhooks"
 	"github.com/bwmarrin/discordgo"
 	"go.uber.org/zap"
 )
@@ -13,7 +13,7 @@ import (
 const interval = time.Minute
 
 type OOCRelay struct {
-	Queue     chan types.OOCMessage
+	Queue     chan webhooks.OOCMessage
 	ChannelID string
 	Discord   *discordgo.Session
 	Logger    *zap.SugaredLogger

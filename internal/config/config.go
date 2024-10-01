@@ -1,10 +1,11 @@
 package config
 
 type Config struct {
-	DebugLog bool          `mapstructure:"debug_log"`
-	Modules  ModulesConfig `mapstructure:"modules"`
-	SS13     SS13Config    `mapstructure:"ss13"`
-	Discord  DiscordConfig `mapstructure:"discord"`
+	DebugLog bool           `mapstructure:"debug_log"`
+	Modules  ModulesConfig  `mapstructure:"modules"`
+	SS13     SS13Config     `mapstructure:"ss13"`
+	Discord  DiscordConfig  `mapstructure:"discord"`
+	Database DatabaseConfig `mapstructure:"database"`
 }
 
 type ModulesConfig struct {
@@ -30,4 +31,12 @@ type DiscordConfig struct {
 	OOCChannelID               string `mapstructure:"ooc_channel_id"`
 	StatusChannelID            string `mapstructure:"status_channel_id"`
 	BYONDVerificationChannelID string `mapstructure:"byond_verification_channel_id"`
+}
+
+type DatabaseConfig struct {
+	Username     string `mapstructure:"username"`
+	Password     string `mapstructure:"password"`
+	Address      string `mapstructure:"address"`
+	Port         string `mapstructure:"port"`
+	DatabaseName string `mapstructure:"database_name"`
 }
