@@ -26,11 +26,10 @@ func (h *ByondVerificationHandler) runVerification() {
 	}()
 
 	h.Logger.Debug("checking verification message and registering handlers...")
-	h.updateVerificationMessage()
 	h.Discord.AddHandler(h.handleInteraction)
 
 	for {
-		// NOTE(rufus): add routine tasks as required
+		h.updateVerificationMessage()
 		time.Sleep(time.Minute)
 	}
 }
