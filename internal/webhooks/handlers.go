@@ -24,7 +24,7 @@ func (h *webhookHandler) handleRequest(w http.ResponseWriter, r *http.Request) {
 
 	authorized := h.checkAuthorization(query.Get("key"))
 
-	data, err := url.QueryUnescape(query.Get("data"))
+	data, err := url.PathUnescape(query.Get("data"))
 	if err != nil {
 		err := fmt.Errorf("failed to url decode data: %w", err)
 		h.handleResponse(getResponse(http.StatusBadRequest, codeMalformedData, err.Error()), w)

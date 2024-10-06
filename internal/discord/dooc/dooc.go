@@ -2,6 +2,7 @@ package dooc
 
 import (
 	"fmt"
+	"net/url"
 	"regexp"
 	"runtime/debug"
 	"strings"
@@ -80,6 +81,7 @@ func (h *DOOCHandler) handleDOOCMessage(sess *discordgo.Session, msg *discordgo.
 
 func (h *DOOCHandler) sendDOOCMessageToSS13(sender, message string) error {
 	h.Logger.Debugf("sending dooc:  %s: %s", sender, message)
+	message = url.QueryEscape(message)
 	request := fmt.Sprintf("dooc&sender_key=%s&message=%s&key=%s", sender, message, h.SS13AccessKey)
 	resp, err := ss13.SendRequest(h.SS13ServerAddress, []byte(request))
 	if err != nil {

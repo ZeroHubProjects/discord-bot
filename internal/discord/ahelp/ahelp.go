@@ -3,6 +3,7 @@ package ahelp
 import (
 	"encoding/json"
 	"fmt"
+	"net/url"
 	"regexp"
 	"runtime/debug"
 	"time"
@@ -112,6 +113,7 @@ func (h *AhelpHandler) handleAhelpMessage(sess *discordgo.Session, msg *discordg
 
 func (h *AhelpHandler) sendAhelpMessageToSS13(sender, target, message string) (responseCode string, err error) {
 	h.Logger.Debugf("sending ahelp:  %s -> %s: %s", sender, target, message)
+	message = url.QueryEscape(message)
 	request := fmt.Sprintf("ahelp&sender_key=%s&target_key=%s&message=%s&key=%s", sender, target, message, h.SS13AccessKey)
 	resp, err := ss13.SendRequest(h.SS13ServerAddress, []byte(request))
 	if err != nil {
