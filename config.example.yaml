@@ -8,14 +8,18 @@ modules:
   dooc_enabled: true
   # BYOND account verification module, manages the channel and interactions, requires database connection
   byond_verification_enabled: true
+  # Ahelp module, listens to messages in the ahelp channel and uses reply system to allow discord responses
+  ahelp_enabled: true
   # Webhooks are used to receive events from the game and act on them, mainly relay them to discord
   webhooks:
     # Global switch for webhook handling, all webhooks endpoints will only work if this is enabled
     enabled: true
     # Network port on which webhooks server will be listening for the requests
     port: 14081
-    # OOC webhook, accepts ooc message webhooks from the game and relays them to the ooc channel in discord
+    # OOC webhook, accepts "ooc" type requests from the game and relays them to the ooc channel in discord
     ooc_messages_enabled: true
+    # Ahelp webhook, accepts "ahelp" type requests from the game and relays them to the ahelp channel in discord
+    ahelp_messages_enabled: true
 
 ss13:
   # The main address of the ss13 server that this bot will communicate with
@@ -34,6 +38,8 @@ discord:
   ooc_channel_id: "1283485860968534066"
   # Discord channel holding the BYOND verification instructions and interaction components
   byond_verification_channel_id: "1287044820392611953"
+  # Ahelp channel for admins to view the in-game ahelp communication and respond to ahelps with simple messages
+  ahelp_channel_id: "1292400604282359808"
 
 # Credentials of the main game database, correct `verification` and `player_discord` tables must be preset
 database:

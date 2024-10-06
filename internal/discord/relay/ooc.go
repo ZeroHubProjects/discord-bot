@@ -10,7 +10,7 @@ import (
 	"go.uber.org/zap"
 )
 
-const interval = time.Minute
+const oocInterval = time.Minute
 
 type OOCRelay struct {
 	Queue     chan webhooks.OOCMessage
@@ -22,10 +22,12 @@ type OOCRelay struct {
 func (r *OOCRelay) Run(wg *sync.WaitGroup) {
 	defer wg.Done()
 
+	r.Logger.Debug("listening to the queue...")
+
 	for {
 		r.runOOCRelay()
-		r.Logger.Debugf("restarting in %v...", interval)
-		time.Sleep(interval)
+		r.Logger.Debugf("restarting in %v...", oocInterval)
+		time.Sleep(oocInterval)
 	}
 }
 

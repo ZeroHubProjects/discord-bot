@@ -15,11 +15,13 @@ import (
 const interval = time.Minute
 
 type WebhookServer struct {
-	Port               int
-	SS13AccessKey      string
-	OOCMessagesEnabled bool
-	OOCMessageQueue    chan OOCMessage
-	Logger             *zap.SugaredLogger
+	Port                 int
+	SS13AccessKey        string
+	OOCMessagesEnabled   bool
+	OOCMessageQueue      chan OOCMessage
+	AhelpMessagesEnabled bool
+	AhelpMessageQueue    chan AhelpMessage
+	Logger               *zap.SugaredLogger
 }
 
 func (s *WebhookServer) Run(wg *sync.WaitGroup) {
@@ -40,10 +42,12 @@ func (s *WebhookServer) runServer() {
 	}()
 
 	handler := webhookHandler{
-		accessKey:       s.SS13AccessKey,
-		oocEnabled:      s.OOCMessagesEnabled,
-		oocMessageQueue: s.OOCMessageQueue,
-		logger:          s.Logger,
+		accessKey:         s.SS13AccessKey,
+		oocEnabled:        s.OOCMessagesEnabled,
+		oocMessageQueue:   s.OOCMessageQueue,
+		ahelpEnabled:      s.AhelpMessagesEnabled,
+		ahelpMessageQueue: s.AhelpMessageQueue,
+		logger:            s.Logger,
 	}
 
 	r := chi.NewRouter()

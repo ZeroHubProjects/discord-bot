@@ -22,3 +22,7 @@ go.work.sum
 # Ignore all configs except the example
 config*.yaml
 !config.example.yaml
+
+# Other common files
+*.bak
+*.old

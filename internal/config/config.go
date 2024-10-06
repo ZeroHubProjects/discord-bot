@@ -12,13 +12,15 @@ type ModulesConfig struct {
 	StatusUpdatesEnabled     bool           `mapstructure:"status_updates_enabled"`
 	DOOCEnabled              bool           `mapstructure:"dooc_enabled"`
 	BYONDVerificationEnabled bool           `mapstructure:"byond_verification_enabled"`
+	AhelpEnabled             bool           `mapstructure:"ahelp_enabled"`
 	Webhooks                 WebhooksConfig `mapstructure:"webhooks"`
 }
 
 type WebhooksConfig struct {
-	Enabled            bool `mapstructure:"enabled"`
-	Port               int  `mapstructure:"port"`
-	OOCMessagesEnabled bool `mapstructure:"ooc_messages_enabled"`
+	Enabled              bool `mapstructure:"enabled"`
+	Port                 int  `mapstructure:"port"`
+	OOCMessagesEnabled   bool `mapstructure:"ooc_messages_enabled"`
+	AhelpMessagesEnabled bool `mapstructure:"ahelp_messages_enabled"`
 }
 
 type SS13Config struct {
@@ -31,6 +33,7 @@ type DiscordConfig struct {
 	OOCChannelID               string `mapstructure:"ooc_channel_id"`
 	StatusChannelID            string `mapstructure:"status_channel_id"`
 	BYONDVerificationChannelID string `mapstructure:"byond_verification_channel_id"`
+	AhelpChannelID             string `mapstructure:"ahelp_channel_id"`
 }
 
 type DatabaseConfig struct {

@@ -5,6 +5,7 @@ import (
 
 	"github.com/ZeroHubProjects/discord-bot/internal/config"
 	"github.com/ZeroHubProjects/discord-bot/internal/database"
+	"github.com/ZeroHubProjects/discord-bot/internal/discord/ahelp"
 	"github.com/ZeroHubProjects/discord-bot/internal/discord/dooc"
 	"github.com/ZeroHubProjects/discord-bot/internal/discord/relay"
 	"github.com/ZeroHubProjects/discord-bot/internal/discord/verification"
@@ -61,10 +62,11 @@ func main() {
 	// webhooks server module
 	if cfg.Modules.Webhooks.Enabled {
 		server := webhooks.WebhookServer{
-			Port:               cfg.Modules.Webhooks.Port,
-			SS13AccessKey:      cfg.SS13.AccessKey,
-			OOCMessagesEnabled: cfg.Modules.Webhooks.OOCMessagesEnabled,
-			Logger:             logger.Named("webhooks"),
+			Port:                 cfg.Modules.Webhooks.Port,
+			SS13AccessKey:        cfg.SS13.AccessKey,
+			OOCMessagesEnabled:   cfg.Modules.Webhooks.OOCMessagesEnabled,
+			AhelpMessagesEnabled: cfg.Modules.Webhooks.AhelpMessagesEnabled,
+			Logger:               logger.Named("webhooks"),
 		}
 		// OOC to discord relay
 		if cfg.Modules.Webhooks.OOCMessagesEnabled {
@@ -74,6 +76,18 @@ func main() {
 				ChannelID: cfg.Discord.OOCChannelID,
 				Discord:   dg,
 				Logger:    logger.Named("relay.ooc"),
+			}
+			wg.Add(1)
+			go relay.Run(wg)
+		}
+		// Ahelp to discord relay
+		if cfg.Modules.Webhooks.AhelpMessagesEnabled {
+			server.AhelpMessageQueue = make(chan webhooks.AhelpMessage, 5)
+			relay := relay.AhelpRelay{
+				Queue:     server.AhelpMessageQueue,
+				ChannelID: cfg.Discord.AhelpChannelID,
+				Discord:   dg,
+				Logger:    logger.Named("relay.ahelp"),
 			}
 			wg.Add(1)
 			go relay.Run(wg)
@@ -105,6 +119,19 @@ func main() {
 			Discord:             dg,
 			Logger:              logger.Named("dooc"),
 			VerificationHandler: verificationHandler, // might be nil if verification is not enabled in the config
+		}
+		wg.Add(1)
+		go handler.Run(wg)
+	}
+	// ahelp channel processing, verification module is required
+	if cfg.Modules.AhelpEnabled && verificationHandler != nil {
+		handler := ahelp.AhelpHandler{
+			SS13ServerAddress:   cfg.SS13.ServerAddress,
+			SS13AccessKey:       cfg.SS13.AccessKey,
+			AhelpChannelID:      cfg.Discord.AhelpChannelID,
+			Discord:             dg,
+			Logger:              logger.Named("ahelp"),
+			VerificationHandler: verificationHandler,
 		}
 		wg.Add(1)
 		go handler.Run(wg)

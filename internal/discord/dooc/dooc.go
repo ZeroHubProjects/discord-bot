@@ -35,7 +35,6 @@ func (h *DOOCHandler) handleDOOCMessage(sess *discordgo.Session, msg *discordgo.
 	if msg.Author.ID == sess.State.User.ID {
 		return
 	}
-	// currently only process dooc messages
 	if msg.ChannelID != h.OOCChannelID {
 		return
 	}
@@ -100,7 +99,7 @@ func (h *DOOCHandler) retryMessage(msg *discordgo.Message) {
 	}
 
 	botMsgContents := msg.Content[len(retryMarker)+1:]
-	re := regexp.MustCompile(`<t:\d+:t> DOOC \*\*(.+?)\*\*: (.+)`)
+	re := regexp.MustCompile(`<t:\d+:t> DOOC \*\*([^*]+?)\*\*: (.+)`)
 	matches := re.FindStringSubmatch(botMsgContents)
 	if len(matches) != 3 {
 		h.Logger.Warnf("failed to parse message for retry: %v", botMsgContents)
