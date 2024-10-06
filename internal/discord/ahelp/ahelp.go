@@ -73,7 +73,7 @@ func (h *AhelpHandler) handleAhelpMessage(sess *discordgo.Session, msg *discordg
 		return
 	}
 	if targetKey == nil {
-		formattedMessage := fmt.Sprintf(":x: No response target found, you must reply to an existing message!\n<t:%d:t> DAhelp **%s**: %s", time.Now().Unix(), msg.Author.ID, msg.Content)
+		formattedMessage := fmt.Sprintf(":x: No response target found, you must reply to an existing message!\n<t:%d:t> DAhelp **%s**: %s", time.Now().Unix(), senderKey, msg.Content)
 		_, err := h.Discord.ChannelMessageSend(msg.ChannelID, formattedMessage)
 		if err != nil {
 			h.Logger.Errorf("failed to send message to discord: %v", err)
