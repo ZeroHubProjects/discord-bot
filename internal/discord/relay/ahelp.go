@@ -2,6 +2,7 @@ package relay
 
 import (
 	"fmt"
+	"strings"
 	"sync"
 	"time"
 
@@ -38,7 +39,12 @@ func (r *AhelpRelay) runAhelpRelay() {
 		if msg.TargetKey != "" {
 			targetPart = fmt.Sprintf(" -> **%s**", msg.TargetKey)
 		}
-		formattedMessage := fmt.Sprintf("<t:%d:t> **%s**%s: %s", time.Now().Unix(), msg.SenderKey, targetPart, msg.Message)
+		pingPart := ""
+		if strings.Contains(msg.Message, "No admins online!") {
+			// hardcoded ID of the "ahelp notifications" role
+			pingPart = "<@&1292516078169231530>"
+		}
+		formattedMessage := fmt.Sprintf("<t:%d:t> **%s**%s: %s %s", time.Now().Unix(), msg.SenderKey, targetPart, msg.Message, pingPart)
 		_, err := r.Discord.ChannelMessageSend(r.ChannelID, formattedMessage)
 		if err != nil {
 			r.Logger.Errorf("failed to send ahelp message to discord: %v", err)
