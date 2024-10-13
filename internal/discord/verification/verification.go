@@ -91,7 +91,7 @@ func (h *ByondVerificationHandler) handleVerificationRequest(code, userID string
 		return false, lzRus[lzVerificationNotFoundResp], nil
 	}
 
-	if time.Now().UTC().After(v.CreatedAt.Add(verificationLifetime)) {
+	if time.Since(v.CreatedAt) > verificationLifetime {
 		err := h.Database.DeleteVerification(code)
 		if err != nil {
 			h.Logger.Errorf("failed to delete outdated verification: %v", err)

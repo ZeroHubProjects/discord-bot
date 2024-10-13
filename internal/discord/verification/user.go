@@ -14,7 +14,7 @@ var lastUserVerificationSend = map[string]time.Time{}
 
 func (h *ByondVerificationHandler) SendUserToVerification(userID string) error {
 	// check if user was recently sent to verification to avoid spamming
-	if t, ok := lastUserVerificationSend[userID]; ok && !time.Now().UTC().After(t.Add(cooldown)) {
+	if t, ok := lastUserVerificationSend[userID]; ok && time.Since(t) <= cooldown {
 		return nil
 	}
 	allow := int64(discordgo.PermissionViewChannel)
