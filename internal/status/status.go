@@ -7,6 +7,7 @@ import (
 	"text/template"
 	"time"
 
+	"github.com/ZeroHubProjects/discord-bot/internal/ss13/status"
 	"github.com/bwmarrin/discordgo"
 	"go.uber.org/zap"
 )
@@ -15,18 +16,18 @@ const (
 	serverName  = "ZeroOnyx"
 	githubLink  = "Temporarily Private"
 	serverColor = 0xFF355E // hex color as decimal, Radical Red
-	interval    = time.Minute
 )
 
 type StatusUpdater struct {
 	Discord           *discordgo.Session
 	SS13ServerAddress string
 	StatusChannelID   string
+	StatusFetcher     *status.ServerStatusFetcher
 	Logger            *zap.SugaredLogger
 }
 
 func (s *StatusUpdater) update() error {
-	serverStatus, err := getServerStatus(s.SS13ServerAddress)
+	serverStatus, err := s.StatusFetcher.GetServerStatus(interval)
 	if err != nil {
 		return fmt.Errorf("failed to get server status: %w", err)
 	}
@@ -74,7 +75,10 @@ func (s *StatusUpdater) update() error {
 var currentUnixTimestamp = func() int64 { return time.Now().Unix() }
 var statusMessageTmplFuncs = template.FuncMap{"currentUnixTimestamp": currentUnixTimestamp, "join": strings.Join}
 
-func (s *StatusUpdater) getStatusMessageDescription(serverStatus serverStatus) (string, error) {
+func (s *StatusUpdater) getStatusMessageDescription(serverStatus *status.ServerStatus) (string, error) {
+	if serverStatus == nil {
+		return "", fmt.Errorf("nil server status passed")
+	}
 	descPayloadParams := descriptionPayloadParams{
 		Players:       serverStatus.Players,
 		RoundTime:     serverStatus.RoundTime,

@@ -9,6 +9,7 @@ import (
 	"github.com/ZeroHubProjects/discord-bot/internal/discord/dooc"
 	"github.com/ZeroHubProjects/discord-bot/internal/discord/relay"
 	"github.com/ZeroHubProjects/discord-bot/internal/discord/verification"
+	fetcher "github.com/ZeroHubProjects/discord-bot/internal/ss13/status"
 	"github.com/ZeroHubProjects/discord-bot/internal/status"
 	"github.com/ZeroHubProjects/discord-bot/internal/webhooks"
 	"github.com/bwmarrin/discordgo"
@@ -48,13 +49,19 @@ func main() {
 	}
 
 	wg := new(sync.WaitGroup)
+	// centralized status fetcher
+	statusFetcher := &fetcher.ServerStatusFetcher{
+		ServerAddress: cfg.SS13.ServerAddress,
+		Logger:        logger.Named("status.fetcher"),
+	}
 	// status updater module
 	if cfg.Modules.StatusUpdatesEnabled {
 		statusUpdater := status.StatusUpdater{
 			Discord:           dg,
 			SS13ServerAddress: cfg.SS13.ServerAddress,
 			StatusChannelID:   cfg.Discord.StatusChannelID,
-			Logger:            logger.Named("status_updates"),
+			StatusFetcher:     statusFetcher,
+			Logger:            logger.Named("status.updater"),
 		}
 		wg.Add(1)
 		go statusUpdater.Run(wg)

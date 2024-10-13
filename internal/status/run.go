@@ -6,6 +6,8 @@ import (
 	"time"
 )
 
+const interval = time.Minute
+
 func (s *StatusUpdater) Run(wg *sync.WaitGroup) {
 	defer wg.Done()
 
