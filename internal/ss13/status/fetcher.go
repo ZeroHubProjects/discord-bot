@@ -29,7 +29,7 @@ func (s *ServerStatusFetcher) GetServerStatus(maxAge time.Duration) (*ServerStat
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 
-	if s.latestServerStatus != nil && time.Since(s.latestServerStatus.FetchedAt) <= maxAge {
+	if s.latestServerStatus != nil && time.Since(s.latestServerStatus.FetchedAt) < maxAge {
 		return s.latestServerStatus, nil
 	}
 

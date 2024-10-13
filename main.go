@@ -9,6 +9,7 @@ import (
 	"github.com/ZeroHubProjects/discord-bot/internal/discord/dooc"
 	"github.com/ZeroHubProjects/discord-bot/internal/discord/relay"
 	"github.com/ZeroHubProjects/discord-bot/internal/discord/verification"
+	"github.com/ZeroHubProjects/discord-bot/internal/metrics"
 	fetcher "github.com/ZeroHubProjects/discord-bot/internal/ss13/status"
 	"github.com/ZeroHubProjects/discord-bot/internal/status"
 	"github.com/ZeroHubProjects/discord-bot/internal/webhooks"
@@ -65,6 +66,16 @@ func main() {
 		}
 		wg.Add(1)
 		go statusUpdater.Run(wg)
+	}
+	// metrics recording module
+	if cfg.Modules.MetricsEnabled {
+		metricsRecorder := metrics.PlayerCountRecorder{
+			Database:      db,
+			StatusFetcher: statusFetcher,
+			Logger:        logger.Named("metrics.playercount"),
+		}
+		wg.Add(1)
+		go metricsRecorder.Run(wg)
 	}
 	// webhooks server module
 	if cfg.Modules.Webhooks.Enabled {

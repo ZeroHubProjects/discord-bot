@@ -10,6 +10,8 @@ modules:
   byond_verification_enabled: true
   # Ahelp module, listens to messages in the ahelp channel and uses reply system to allow discord responses
   ahelp_enabled: true
+  # Metrics module records statistics about the server into the common database at regular intervals
+  metrics_enabled: true
   # Webhooks are used to receive events from the game and act on them, mainly relay them to discord
   webhooks:
     # Global switch for webhook handling, all webhooks endpoints will only work if this is enabled

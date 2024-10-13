@@ -13,6 +13,7 @@ type ModulesConfig struct {
 	DOOCEnabled              bool           `mapstructure:"dooc_enabled"`
 	BYONDVerificationEnabled bool           `mapstructure:"byond_verification_enabled"`
 	AhelpEnabled             bool           `mapstructure:"ahelp_enabled"`
+	MetricsEnabled           bool           `mapstructure:"metrics_enabled"`
 	Webhooks                 WebhooksConfig `mapstructure:"webhooks"`
 }
 
