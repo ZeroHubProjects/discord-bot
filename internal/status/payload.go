@@ -27,7 +27,7 @@ const (
 	{{end -}}
 {{end -}}
 {{define "ServerAddress"}}Server Address: ` + "`" + `{{.ServerAddress}}` + "`" + `{{"\n"}}{{end -}}
-{{define "GitHub"}}GitHub: Temporarily Unavailable{{"\n"}}{{end -}}
+{{define "GitHub"}}GitHub: [ZeroHubProjects/ZeroOnyx](https://github.com/ZeroHubProjects/ZeroOnyx){{"\n"}}{{end -}}
 {{define "LastUpdated"}}Last updated: <t:{{currentUnixTimestamp}}:R>{{"\n"}}{{end -}}
 
 {{block "Description" . -}}
