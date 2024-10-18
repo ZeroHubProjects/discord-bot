@@ -30,11 +30,11 @@ type SS13Config struct {
 }
 
 type DiscordConfig struct {
-	BotToken                   string `mapstructure:"bot_token"`
-	OOCChannelID               string `mapstructure:"ooc_channel_id"`
-	StatusChannelID            string `mapstructure:"status_channel_id"`
-	BYONDVerificationChannelID string `mapstructure:"byond_verification_channel_id"`
-	AhelpChannelID             string `mapstructure:"ahelp_channel_id"`
+	BotToken                   string   `mapstructure:"bot_token"`
+	OOCChannelID               string   `mapstructure:"ooc_channel_id"`
+	StatusChannelIDs           []string `mapstructure:"status_channel_ids"`
+	BYONDVerificationChannelID string   `mapstructure:"byond_verification_channel_id"`
+	AhelpChannelID             string   `mapstructure:"ahelp_channel_id"`
 }
 
 type DatabaseConfig struct {

@@ -34,8 +34,10 @@ discord:
   # Bot token of your discord application
   # Create your bot and find its token here https://discord.com/developers/applications
   bot_token: "<your token here>"
-  # Discord channel where status updates will be posted
-  status_channel_id: "1283679676895858750"
+  # Discord channels where status updates will be posted
+  status_channel_ids:
+    - "1283679676895858750"
+    - "1113387455660441691"
   # Discord channel where OOC messages will be posted and DOOC messages will be accepted
   ooc_channel_id: "1283485860968534066"
   # Discord channel holding the BYOND verification instructions and interaction components

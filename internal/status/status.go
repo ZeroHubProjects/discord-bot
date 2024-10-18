@@ -7,7 +7,7 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/ZeroHubProjects/discord-bot/internal/ss13/status"
+	"github.com/ZeroHubProjects/discord-bot/internal/ss13"
 	"github.com/bwmarrin/discordgo"
 	"go.uber.org/zap"
 )
@@ -21,18 +21,17 @@ const (
 type StatusUpdater struct {
 	Discord           *discordgo.Session
 	SS13ServerAddress string
-	StatusChannelID   string
-	StatusFetcher     *status.ServerStatusFetcher
+	StatusChannelIDs  []string
+	StatusFetcher     *ss13.ServerStatusFetcher
 	Logger            *zap.SugaredLogger
 }
 
-func (s *StatusUpdater) update() error {
-	serverStatus, err := s.StatusFetcher.GetServerStatus(interval)
-	if err != nil {
-		return fmt.Errorf("failed to get server status: %w", err)
+func (s *StatusUpdater) update(status *ss13.ServerStatus, channelID string) error {
+	if status == nil {
+		return fmt.Errorf("nil server status passed")
 	}
 
-	msgs, err := s.Discord.ChannelMessages(s.StatusChannelID, 10, "", "", "")
+	msgs, err := s.Discord.ChannelMessages(channelID, 10, "", "", "")
 	if err != nil {
 		return fmt.Errorf("failed to get messages from the channel: %w", err)
 	}
@@ -44,7 +43,7 @@ func (s *StatusUpdater) update() error {
 		}
 	}
 
-	newMessageDescription, err := s.getStatusMessageDescription(serverStatus)
+	newMessageDescription, err := s.getStatusMessageDescription(status)
 	if err != nil {
 		return fmt.Errorf("failed to create new message description: %w", err)
 	}
@@ -58,12 +57,12 @@ func (s *StatusUpdater) update() error {
 
 	if statusMessage == nil {
 		newMessage := discordgo.MessageSend{Embeds: []*discordgo.MessageEmbed{embed}}
-		_, err := s.Discord.ChannelMessageSendComplex(s.StatusChannelID, &newMessage)
+		_, err := s.Discord.ChannelMessageSendComplex(channelID, &newMessage)
 		if err != nil {
 			return fmt.Errorf("failed to post message: %w", err)
 		}
 	} else {
-		newEdit := discordgo.NewMessageEdit(s.StatusChannelID, statusMessage.ID).SetEmbed(embed)
+		newEdit := discordgo.NewMessageEdit(channelID, statusMessage.ID).SetEmbed(embed)
 		_, err := s.Discord.ChannelMessageEditComplex(newEdit)
 		if err != nil {
 			return fmt.Errorf("failed to update message: %w", err)
@@ -75,7 +74,7 @@ func (s *StatusUpdater) update() error {
 var currentUnixTimestamp = func() int64 { return time.Now().Unix() }
 var statusMessageTmplFuncs = template.FuncMap{"currentUnixTimestamp": currentUnixTimestamp, "join": strings.Join}
 
-func (s *StatusUpdater) getStatusMessageDescription(serverStatus *status.ServerStatus) (string, error) {
+func (s *StatusUpdater) getStatusMessageDescription(serverStatus *ss13.ServerStatus) (string, error) {
 	if serverStatus == nil {
 		return "", fmt.Errorf("nil server status passed")
 	}

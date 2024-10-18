@@ -1,4 +1,4 @@
-package status
+package ss13
 
 import (
 	"encoding/json"
@@ -6,7 +6,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ZeroHubProjects/discord-bot/internal/ss13"
 	"go.uber.org/zap"
 )
 
@@ -44,7 +43,7 @@ func (s *ServerStatusFetcher) GetServerStatus(maxAge time.Duration) (*ServerStat
 
 func (s *ServerStatusFetcher) fetchServerStatus() (*ServerStatus, error) {
 	var result ServerStatus
-	resp, err := ss13.SendRequest(s.ServerAddress, []byte("discordstatus"))
+	resp, err := SendRequest(s.ServerAddress, []byte("discordstatus"))
 	if err != nil {
 		return nil, fmt.Errorf("failed to send request: %w", err)
 	}

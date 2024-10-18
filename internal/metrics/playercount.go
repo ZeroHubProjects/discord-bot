@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/ZeroHubProjects/discord-bot/internal/database"
-	"github.com/ZeroHubProjects/discord-bot/internal/ss13/status"
+	"github.com/ZeroHubProjects/discord-bot/internal/ss13"
 	"go.uber.org/zap"
 )
 
@@ -14,7 +14,7 @@ const interval = time.Minute
 
 type PlayerCountRecorder struct {
 	Database      *database.Database
-	StatusFetcher *status.ServerStatusFetcher
+	StatusFetcher *ss13.ServerStatusFetcher
 	Logger        *zap.SugaredLogger
 }
 

@@ -28,9 +28,18 @@ func (s *StatusUpdater) runUpdates() {
 	s.Logger.Debugf("updating with %v interval...", interval)
 
 	for {
-		err := s.update()
+		serverStatus, err := s.StatusFetcher.GetServerStatus(interval)
 		if err != nil {
-			s.Logger.Errorf("failed to update: %v", err)
+			s.Logger.Errorf("failed to get server status: %w", err)
+			time.Sleep(interval)
+			continue
+		}
+		for _, channelID := range s.StatusChannelIDs {
+			err = s.update(serverStatus, channelID)
+			if err != nil {
+				s.Logger.Errorf("failed to update: %v, channel id: %s", err, channelID)
+				continue
+			}
 		}
 		time.Sleep(interval)
 	}
