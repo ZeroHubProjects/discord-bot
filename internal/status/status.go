@@ -19,11 +19,12 @@ const (
 )
 
 type StatusUpdater struct {
-	Discord           *discordgo.Session
-	SS13ServerAddress string
-	StatusChannelIDs  []string
-	StatusFetcher     *ss13.ServerStatusFetcher
-	Logger            *zap.SugaredLogger
+	Discord                *discordgo.Session
+	SS13ServerAddress      string
+	SS13AlternativeAddress string
+	StatusChannelIDs       []string
+	StatusFetcher          *ss13.ServerStatusFetcher
+	Logger                 *zap.SugaredLogger
 }
 
 func (s *StatusUpdater) update(status *ss13.ServerStatus, channelID string) error {
@@ -79,12 +80,13 @@ func (s *StatusUpdater) getStatusMessageDescription(serverStatus *ss13.ServerSta
 		return "", fmt.Errorf("nil server status passed")
 	}
 	descPayloadParams := descriptionPayloadParams{
-		Players:       serverStatus.Players,
-		RoundTime:     serverStatus.RoundTime,
-		Map:           serverStatus.Map,
-		Evac:          serverStatus.Evac == 1,
-		ServerAddress: "byond://" + s.SS13ServerAddress,
-		GitHubLink:    githubLink,
+		Players:                  serverStatus.Players,
+		RoundTime:                serverStatus.RoundTime,
+		Map:                      serverStatus.Map,
+		Evac:                     serverStatus.Evac == 1,
+		ServerAddress:            "byond://" + s.SS13ServerAddress,
+		AlternativeServerAddress: s.SS13AlternativeAddress,
+		GitHubLink:               githubLink,
 	}
 	descriptionTmpl := template.Must(template.
 		New("statusMessageDescription").

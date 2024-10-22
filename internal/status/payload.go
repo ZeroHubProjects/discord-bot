@@ -26,7 +26,7 @@ const (
 		**The station is undergoing evacuation procedures!**{{"\n" -}}
 	{{end -}}
 {{end -}}
-{{define "ServerAddress"}}Server Address: ` + "`" + `{{.ServerAddress}}` + "`" + `{{"\n"}}{{end -}}
+{{define "ServerAddress"}}Server Address: [{{.ServerAddress}}]({{.AlternativeServerAddress}}){{"\n"}}{{end -}}
 {{define "GitHub"}}GitHub: [ZeroHubProjects/ZeroOnyx](https://github.com/ZeroHubProjects/ZeroOnyx){{"\n"}}{{end -}}
 {{define "LastUpdated"}}Last updated: <t:{{currentUnixTimestamp}}:R>{{"\n"}}{{end -}}
 
@@ -44,10 +44,11 @@ const (
 )
 
 type descriptionPayloadParams struct {
-	Players       []string
-	ServerAddress string
-	RoundTime     string
-	Map           string
-	Evac          bool
-	GitHubLink    string
+	Players                  []string
+	ServerAddress            string
+	AlternativeServerAddress string
+	RoundTime                string
+	Map                      string
+	Evac                     bool
+	GitHubLink               string
 }

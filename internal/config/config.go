@@ -25,8 +25,9 @@ type WebhooksConfig struct {
 }
 
 type SS13Config struct {
-	ServerAddress string `mapstructure:"server_address"`
-	AccessKey     string `mapstructure:"access_key"`
+	ServerAddress            string `mapstructure:"server_address"`
+	AlternativeServerAddress string `mapstructure:"alternative_server_address"`
+	AccessKey                string `mapstructure:"access_key"`
 }
 
 type DiscordConfig struct {

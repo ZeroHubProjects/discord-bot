@@ -58,11 +58,12 @@ func main() {
 	// status updater module
 	if cfg.Modules.StatusUpdatesEnabled {
 		statusUpdater := status.StatusUpdater{
-			Discord:           dg,
-			SS13ServerAddress: cfg.SS13.ServerAddress,
-			StatusChannelIDs:  cfg.Discord.StatusChannelIDs,
-			StatusFetcher:     statusFetcher,
-			Logger:            logger.Named("status.updater"),
+			Discord:                dg,
+			SS13ServerAddress:      cfg.SS13.ServerAddress,
+			SS13AlternativeAddress: cfg.SS13.AlternativeServerAddress,
+			StatusChannelIDs:       cfg.Discord.StatusChannelIDs,
+			StatusFetcher:          statusFetcher,
+			Logger:                 logger.Named("status.updater"),
 		}
 		wg.Add(1)
 		go statusUpdater.Run(wg)

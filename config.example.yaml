@@ -26,6 +26,10 @@ modules:
 ss13:
   # The main address of the ss13 server that this bot will communicate with
   server_address: "zeroonyx.rufuszero.com:14076"
+  # Alternative server address that will be used to make server address in status message clickable,
+  # must be http:// or https:// to comply with discord links restriction.
+  # This is for player convenience only and could point to a redirect page that opens byond:// link for example.
+  alternative_server_address: "https://play.zeroonyx.com"
   # The access key that incoming requests will be checked against
   # must match the key that is set on your ss13 server in webhook config, can be any string
   access_key: "<your key here>"
