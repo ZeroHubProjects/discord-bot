@@ -56,8 +56,22 @@ func (s *StatusUpdater) update(status *ss13.ServerStatus, channelID string) erro
 		Color:       serverColor,
 	}
 
+	button := &discordgo.Button{
+		Label:    "Play",
+		Style:    discordgo.LinkButton,
+		URL:      s.SS13AlternativeAddress,
+		Disabled: false,
+	}
+
+	components := discordgo.ActionsRow{
+		Components: []discordgo.MessageComponent{button},
+	}
+
 	if statusMessage == nil {
-		newMessage := discordgo.MessageSend{Embeds: []*discordgo.MessageEmbed{embed}}
+		newMessage := discordgo.MessageSend{
+			Embeds:     []*discordgo.MessageEmbed{embed},
+			Components: []discordgo.MessageComponent{components},
+		}
 		_, err := s.Discord.ChannelMessageSendComplex(channelID, &newMessage)
 		if err != nil {
 			return fmt.Errorf("failed to post message: %w", err)
