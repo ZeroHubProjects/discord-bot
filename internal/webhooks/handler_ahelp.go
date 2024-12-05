@@ -23,7 +23,7 @@ func (h *webhookHandler) handleAhelp(data string, authorized bool) response {
 		return getResponse(http.StatusBadRequest, codeMalformedData, err.Error())
 	}
 	if msg.SenderKey == "" || msg.Message == "" {
-		return getResponse(http.StatusBadRequest, codeMalformedData, "Both `ckey` and `message` are required in the `data`")
+		return getResponse(http.StatusBadRequest, codeMalformedData, "Both `sender_key` and `message` are required in the `data`")
 	}
 	err = h.enqueueAhelpMessage(msg)
 	if err != nil {

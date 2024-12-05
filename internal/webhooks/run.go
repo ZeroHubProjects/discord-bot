@@ -19,6 +19,8 @@ type WebhookServer struct {
 	SS13AccessKey        string
 	OOCMessagesEnabled   bool
 	OOCMessageQueue      chan OOCMessage
+	EmoteMessagesEnabled bool
+	EmoteMessageQueue    chan EmoteMessage
 	AhelpMessagesEnabled bool
 	AhelpMessageQueue    chan AhelpMessage
 	Logger               *zap.SugaredLogger
@@ -45,6 +47,8 @@ func (s *WebhookServer) runServer() {
 		accessKey:         s.SS13AccessKey,
 		oocEnabled:        s.OOCMessagesEnabled,
 		oocMessageQueue:   s.OOCMessageQueue,
+		emoteEnabled:      s.EmoteMessagesEnabled,
+		emoteMessageQueue: s.EmoteMessageQueue,
 		ahelpEnabled:      s.AhelpMessagesEnabled,
 		ahelpMessageQueue: s.AhelpMessageQueue,
 		logger:            s.Logger,

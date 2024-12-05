@@ -21,6 +21,7 @@ type WebhooksConfig struct {
 	Enabled              bool `mapstructure:"enabled"`
 	Port                 int  `mapstructure:"port"`
 	OOCMessagesEnabled   bool `mapstructure:"ooc_messages_enabled"`
+	EmoteMessagesEnabled bool `mapstructure:"emote_messages_enabled"`
 	AhelpMessagesEnabled bool `mapstructure:"ahelp_messages_enabled"`
 }
 
@@ -33,6 +34,7 @@ type SS13Config struct {
 type DiscordConfig struct {
 	BotToken                   string   `mapstructure:"bot_token"`
 	OOCChannelID               string   `mapstructure:"ooc_channel_id"`
+	EmoteChannelID             string   `mapstructure:"emote_channel_id"`
 	StatusChannelIDs           []string `mapstructure:"status_channel_ids"`
 	BYONDVerificationChannelID string   `mapstructure:"byond_verification_channel_id"`
 	AhelpChannelID             string   `mapstructure:"ahelp_channel_id"`

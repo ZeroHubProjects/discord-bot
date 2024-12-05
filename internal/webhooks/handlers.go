@@ -12,8 +12,10 @@ import (
 type webhookHandler struct {
 	accessKey         string
 	oocEnabled        bool
-	ahelpEnabled      bool
 	oocMessageQueue   chan OOCMessage
+	emoteEnabled      bool
+	emoteMessageQueue chan EmoteMessage
+	ahelpEnabled      bool
 	ahelpMessageQueue chan AhelpMessage
 	logger            *zap.SugaredLogger
 }
@@ -34,6 +36,8 @@ func (h *webhookHandler) handleRequest(w http.ResponseWriter, r *http.Request) {
 	switch query.Get("type") {
 	case "ooc":
 		resp = h.handleOOC(data, authorized)
+	case "emote":
+		resp = h.handleEmote(data, authorized)
 	case "ahelp":
 		resp = h.handleAhelp(data, authorized)
 	case "":

@@ -20,6 +20,8 @@ modules:
     port: 14081
     # OOC webhook, accepts "ooc" type requests from the game and relays them to the ooc channel in discord
     ooc_messages_enabled: true
+    # Emote webhook, accepts "emote" type requests from the game and relays them to the emote channel in discord
+    emote_messages_enabled: true
     # Ahelp webhook, accepts "ahelp" type requests from the game and relays them to the ahelp channel in discord
     ahelp_messages_enabled: true
 
@@ -44,6 +46,8 @@ discord:
     - "1113387455660441691"
   # Discord channel where OOC messages will be posted and DOOC messages will be accepted
   ooc_channel_id: "1283485860968534066"
+  # Discord channel where emote messages will be posted
+  emote_channel_id: "1314204408929845288"
   # Discord channel holding the BYOND verification instructions and interaction components
   byond_verification_channel_id: "1287044820392611953"
   # Ahelp channel for admins to view the in-game ahelp communication and respond to ahelps with simple messages

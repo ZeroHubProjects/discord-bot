@@ -84,6 +84,7 @@ func main() {
 			Port:                 cfg.Modules.Webhooks.Port,
 			SS13AccessKey:        cfg.SS13.AccessKey,
 			OOCMessagesEnabled:   cfg.Modules.Webhooks.OOCMessagesEnabled,
+			EmoteMessagesEnabled: cfg.Modules.Webhooks.EmoteMessagesEnabled,
 			AhelpMessagesEnabled: cfg.Modules.Webhooks.AhelpMessagesEnabled,
 			Logger:               logger.Named("webhooks"),
 		}
@@ -95,6 +96,18 @@ func main() {
 				ChannelID: cfg.Discord.OOCChannelID,
 				Discord:   dg,
 				Logger:    logger.Named("relay.ooc"),
+			}
+			wg.Add(1)
+			go relay.Run(wg)
+		}
+		// Emote to discord relay
+		if cfg.Modules.Webhooks.EmoteMessagesEnabled {
+			server.EmoteMessageQueue = make(chan webhooks.EmoteMessage, 5)
+			relay := relay.EmoteRelay{
+				Queue:     server.EmoteMessageQueue,
+				ChannelID: cfg.Discord.EmoteChannelID,
+				Discord:   dg,
+				Logger:    logger.Named("relay.emote"),
 			}
 			wg.Add(1)
 			go relay.Run(wg)
